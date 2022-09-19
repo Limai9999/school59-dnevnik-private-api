@@ -28,7 +28,7 @@ async function getSchedule(req: Request, res: Response) {
   console.log(`Начато получение расписания - ${login}`);
 
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     defaultViewport: null,
     args: ['--no-sandbox'],
   });
