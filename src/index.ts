@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-const PORT = 2078;
+const PORT = 2077;
 
 async function start(): Promise<void> {
   const routersDir = fs.readdirSync(path.join(__dirname, 'routers'));
