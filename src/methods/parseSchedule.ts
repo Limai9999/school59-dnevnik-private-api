@@ -27,7 +27,7 @@ async function parseSchedule(req: Request, res: Response) {
 
     const workbook = new Excel.Workbook();
 
-    const filePath = path.resolve(__dirname, '../../../files/schedule', filename);
+    const filePath = path.resolve(__dirname, '../../files/schedule', filename);
     await workbook.xlsx.readFile(filePath);
 
     let classColumn = 0;
@@ -163,7 +163,7 @@ async function parseSchedule(req: Request, res: Response) {
 
     const objectedSchedule = schedule.map((scheduleString) => {
       const [time, lesson, room] = scheduleString.split(' - ');
-      return {time, lesson: lesson === '-' ? null : lesson, room};
+      return {time, lesson: lesson === '-' ? null : lesson, room: room === undefined ? null : room};
     });
 
     const returning = {
@@ -184,9 +184,11 @@ async function parseSchedule(req: Request, res: Response) {
       message: returning,
     });
   } catch (error) {
+    console.log('Ошибка в parseSchedule', error);
+
     res.json({
       status: false,
-      message: error,
+      message: `${error}`,
     });
   }
 }
