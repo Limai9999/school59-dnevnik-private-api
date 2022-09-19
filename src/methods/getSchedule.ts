@@ -70,7 +70,7 @@ async function getSchedule(req: Request, res: Response) {
     await page.keyboard.press('Enter');
 
     console.log('Данные введены, идёт вход...');
-    await page.waitForNetworkIdle();
+    await page.waitForNetworkIdle({idleTime: 3000});
 
     const modalData = await page.evaluate(() => {
       const modal = document.querySelector('.modal-dialog');
@@ -78,8 +78,10 @@ async function getSchedule(req: Request, res: Response) {
 
       const [header, body] = modal.children[0].children as unknown as HTMLElement[];
 
-      const title = header.innerText = header.innerText.replace('×\n', '');
-      const description = body.innerText = body.innerText.replace('×\n', '');
+      if (!header || !body) return;
+
+      const title = header.innerText.replace('×\n', '');
+      const description = body.innerText.replace('×\n', '');
 
       return {
         title,
@@ -100,6 +102,8 @@ async function getSchedule(req: Request, res: Response) {
       });
     }
 
+    await page.waitForNetworkIdle({idleTime: 2000});
+
     // пройти предупреждение о безопасности
     await page.evaluate(() => {
       const title = document.querySelector('.title') as HTMLElement;
@@ -110,7 +114,7 @@ async function getSchedule(req: Request, res: Response) {
       }
     });
 
-    await page.waitForNetworkIdle();
+    await page.waitForNetworkIdle({idleTime: 3000});
 
     console.log('Вход завершен, переход на доску объявлений');
 
@@ -129,7 +133,7 @@ async function getSchedule(req: Request, res: Response) {
     }
     console.log('Открыта доска объявлений.');
 
-    await page.waitForNetworkIdle();
+    await page.waitForNetworkIdle({idleTime: 3000});
 
     const announcements: Announcement[] = await page.evaluate(() => {
       const announcementsTable = document.querySelector('.content')!.children[0].children[0].children[0].children[1].children[1].children[3].children[0].children[0].children[0].children;
@@ -208,12 +212,24 @@ async function getSchedule(req: Request, res: Response) {
 
     logoutAndCloseBrowser();
 
+    // scheduleFiles.push({
+    //   filename: 'изменения на 15 сентября.xlsx',
+    //   selector: '',
+    // });
+
+    // scheduleFiles.push({
+    //   filename: 'изменения в расписании на 14 сентября.xlsx',
+    //   selector: '',
+    // });
+
     res.json({
       status: true,
       message: `Скачано ${scheduleFiles.length} файлов с расписанием.`,
       files: scheduleFiles,
     });
   } catch (error) {
+    console.log('Ошибка в getSchedule', error);
+
     return res.json({
       status: false,
       message: `${error}`,
