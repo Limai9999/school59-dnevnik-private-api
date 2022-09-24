@@ -1,6 +1,8 @@
 import Excel from 'exceljs';
 import path from 'path';
 
+import {statSync} from 'fs';
+
 import {Request, Response} from 'express';
 
 type ScheduleData = {
@@ -166,6 +168,8 @@ async function parseSchedule(req: Request, res: Response) {
       return {time, lesson: lesson === '-' ? null : lesson, room: room === undefined ? null : room};
     });
 
+    const fileStats = statSync(filePath);
+
     const returning = {
       distant: false,
       schedule,
@@ -175,9 +179,10 @@ async function parseSchedule(req: Request, res: Response) {
       date,
       filename,
       room,
+      creationTime: Math.floor(fileStats.birthtimeMs),
     };
 
-    console.log(`Расписание ${filename} успешно спарщено.`);
+    console.log(`Расписание "${filename}" успешно спарщено.`);
 
     res.json({
       status: true,
