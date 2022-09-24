@@ -9,6 +9,13 @@ import {Announcement, AnnouncementFile} from '../types/schedule/Announcement';
 
 import {Request, Response} from 'express';
 
+import {Tests} from '../types/schedule/Tests';
+
+const test: Tests = {
+  enabled: false,
+  type: 'onlyReturnFiles',
+};
+
 async function getSchedule(req: Request, res: Response) {
   if (!req.body) {
     return res.json({
@@ -22,6 +29,17 @@ async function getSchedule(req: Request, res: Response) {
     return res.json({
       status: false,
       message: 'Логин и пароль не введены.',
+    });
+  }
+
+  if (test.enabled && test.type === 'onlyReturnFiles') {
+    return res.json({
+      status: true,
+      message: 'got schedule',
+      files: [
+        {filename: 'изменения на 16 сентября.xlsx', selector: 'test'},
+        {filename: 'изменения в расписании на 14 сентября.xlsx', selector: 'test'},
+      ],
     });
   }
 
