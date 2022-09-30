@@ -1,5 +1,3 @@
-import puppeteer from 'puppeteer';
-
 import path from 'path';
 
 import waitMs from '../utils/waitMs';
@@ -10,6 +8,7 @@ import {Announcement, AnnouncementFile} from '../types/schedule/Announcement';
 import {Request, Response} from 'express';
 
 import {Tests} from '../types/schedule/Tests';
+import loginToNetcity from '../utils/loginToNetcity';
 
 const test: Tests = {
   enabled: false,
@@ -45,16 +44,14 @@ async function getSchedule(req: Request, res: Response) {
 
   console.log(`Начато получение расписания - ${login}`);
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    defaultViewport: null,
-    args: ['--no-sandbox'],
-  });
-  console.log('Браузер открыт.');
+  const {client, logoutAndCloseBrowser, page, status, error} = await loginToNetcity(login, password);
 
-  const page = await browser.newPage();
-
-  const client = await page.target().createCDPSession();
+  if (!status) {
+    return res.json({
+      status,
+      message: error,
+    });
+  }
 
   const downloadPath = path.resolve(__dirname, '../../files/schedule');
   await client.send('Page.setDownloadBehavior', {
@@ -62,79 +59,8 @@ async function getSchedule(req: Request, res: Response) {
     downloadPath,
   });
 
-  const logoutAndCloseBrowser = async () => {
-    await page.evaluate(() => {
-      // @ts-ignore
-      Logout();
-    });
-
-    await page.waitForNetworkIdle();
-
-    await browser.close();
-  };
-
   try {
-    await page.goto('https://dnevnik.school59-ekb.ru/', {
-      waitUntil: 'networkidle0',
-    });
-    console.log('Загружена страница входа. Идёт ввод данных для входа.');
-
-    await page.focus('input[name="UN"]');
-    await page.keyboard.type(login);
-
-    await page.focus('input[name="PW"]');
-    await page.keyboard.type(password);
-
-    await page.keyboard.press('Enter');
-
-    console.log('Данные введены, идёт вход...');
-    await page.waitForNetworkIdle({idleTime: 3000});
-
-    const modalData = await page.evaluate(() => {
-      const modal = document.querySelector('.modal-dialog');
-      if (!modal) return;
-
-      const [header, body] = modal.children[0].children as unknown as HTMLElement[];
-
-      if (!header || !body) return;
-
-      const title = header.innerText.replace('×\n', '');
-      const description = body.innerText.replace('×\n', '');
-
-      return {
-        title,
-        description,
-      };
-    });
-
-    if (modalData) {
-      const {title, description} = modalData!;
-
-      logoutAndCloseBrowser();
-
-      console.log(`Уведомление, предотвратившее вход: ${title} - ${description}`);
-
-      return res.json({
-        status: false,
-        message: `${title} - ${description}`,
-      });
-    }
-
-    await page.waitForNetworkIdle({idleTime: 2000});
-
-    // пройти предупреждение о безопасности
-    await page.evaluate(() => {
-      const title = document.querySelector('.title') as HTMLElement;
-
-      if (title.innerText === 'Предупреждение о безопасности') {
-        // @ts-ignore
-        doContinue();
-      }
-    });
-
-    await page.waitForNetworkIdle({idleTime: 3000});
-
-    console.log('Вход завершен, переход на доску объявлений');
+    console.log('Переход на доску объявлений...');
 
     const currentTitle = await page.evaluate(() => {
       const titleDivChildren = document.querySelector('.title')?.children as unknown as HTMLElement[];
@@ -149,9 +75,10 @@ async function getSchedule(req: Request, res: Response) {
         SetSelectedTab(92, '/angular/school/announcements/');
       });
     }
-    console.log('Открыта доска объявлений.');
 
     await page.waitForNetworkIdle({idleTime: 3000});
+
+    console.log('Открыта доска объявлений.');
 
     const announcements: Announcement[] = await page.evaluate(() => {
       const announcementsTable = document.querySelector('.content')!.children[0].children[0].children[0].children[1].children[1].children[3].children[0].children[0].children[0].children;
@@ -229,16 +156,6 @@ async function getSchedule(req: Request, res: Response) {
     console.log('Загрузка файлов завершена.');
 
     logoutAndCloseBrowser();
-
-    // scheduleFiles.push({
-    //   filename: 'изменения на 15 сентября.xlsx',
-    //   selector: '',
-    // });
-
-    // scheduleFiles.push({
-    //   filename: 'изменения в расписании на 14 сентября.xlsx',
-    //   selector: '',
-    // });
 
     res.json({
       status: true,
