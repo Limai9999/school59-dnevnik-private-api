@@ -1,13 +1,8 @@
 import puppeteer from 'puppeteer';
 
-export default async function loginToNetcity(login: string, password: string): Promise<{
-  status: boolean
-  error?: string
-  page: puppeteer.Page
-  browser: puppeteer.Browser
-  client: puppeteer.CDPSession
-  logoutAndCloseBrowser: () => Promise<boolean>
-}> {
+import {LoginToNetcity} from '../types/Responses/LoginToNetcity';
+
+export default async function loginToNetcity(login: string, password: string): Promise<LoginToNetcity> {
   const browser = await puppeteer.launch({
     headless: true,
     defaultViewport: null,

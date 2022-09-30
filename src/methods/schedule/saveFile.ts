@@ -1,15 +1,15 @@
-import {Request, Response} from 'express';
-
 import fetch from 'node-fetch';
 import path from 'path';
 import {createWriteStream} from 'fs';
+
+import {MethodInputData} from '../../types/methods/MethodInputData';
 
 type FileData = {
   filename: string
   url: string
 }
 
-async function saveFile(req: Request, res: Response) {
+async function saveFile({req, res}: MethodInputData) {
   if (!req.body) {
     res.json({
       status: false,

@@ -3,14 +3,14 @@ import path from 'path';
 
 import {statSync} from 'fs';
 
-import {Request, Response} from 'express';
+import {MethodInputData} from '../../types/methods/MethodInputData';
 
 type ScheduleData = {
   filename: string
   className: string
 }
 
-async function parseSchedule(req: Request, res: Response) {
+async function parseSchedule({req, res}: MethodInputData) {
   try {
     if (!req.body) {
       res.json({

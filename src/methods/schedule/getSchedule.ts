@@ -1,21 +1,21 @@
 import path from 'path';
 
-import waitMs from '../utils/waitMs';
+import waitMs from '../../utils/waitMs';
 
-import {Credentials} from '../types/schedule/Credentials';
-import {Announcement, AnnouncementFile} from '../types/schedule/Announcement';
+import {Credentials} from '../../types/netcity/Credentials';
+import {Announcement, AnnouncementFile} from '../../types/schedule/Announcement';
 
-import {Request, Response} from 'express';
+import {MethodInputData} from '../../types/methods/MethodInputData';
 
-import {Tests} from '../types/schedule/Tests';
-import loginToNetcity from '../utils/loginToNetcity';
+import {Tests} from '../../types/schedule/Tests';
+import loginToNetcity from '../../utils/loginToNetcity';
 
 const test: Tests = {
   enabled: false,
   type: 'onlyReturnFiles',
 };
 
-async function getSchedule(req: Request, res: Response) {
+async function getSchedule({req, res}: MethodInputData) {
   if (!req.body) {
     return res.json({
       status: false,

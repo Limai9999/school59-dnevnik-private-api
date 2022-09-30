@@ -1,12 +1,14 @@
 import express from 'express';
 const router = express.Router();
 
-import getSchedule from '../methods/getSchedule';
-import parseSchedule from '../methods/parseSchedule';
-import saveFile from '../methods/saveFile';
+import getSchedule from '../methods/schedule/getSchedule';
+import parseSchedule from '../methods/schedule/parseSchedule';
+import saveFile from '../methods/schedule/saveFile';
 
-router.get('/get', getSchedule);
-router.get('/parse', parseSchedule);
-router.post('/saveFile', saveFile);
+import {MethodInputData} from '../types/methods/MethodInputData';
+
+router.get('/get', (req, res) => getSchedule({req, res} as MethodInputData));
+router.get('/parse', (req, res) => parseSchedule({req, res} as MethodInputData));
+router.post('/saveFile', (req, res) => saveFile({req, res} as MethodInputData));
 
 export default router;
