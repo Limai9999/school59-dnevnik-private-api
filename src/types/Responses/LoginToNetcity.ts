@@ -6,5 +6,6 @@ export type LoginToNetcity = {
   page: puppeteer.Page
   browser: puppeteer.Browser
   client: puppeteer.CDPSession
+  at: string
   logoutAndCloseBrowser: () => Promise<boolean>
 };

@@ -30,17 +30,20 @@ async function getCookies({req, res}: MethodInputData) {
     return res.json({
       status: false,
       error: loginData.error!,
-      sessionId: 0,
+      session: {id: 0, endTime: 0},
+      at: loginData.at,
       cookies: [],
     });
   }
 
   const session = netcitySession.addSession(loginData);
+
   const cookies = await loginData.page.cookies();
 
   return res.json({
     status: true,
     session,
+    at: loginData.at,
     cookies,
   });
 }

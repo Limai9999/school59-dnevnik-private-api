@@ -28,6 +28,18 @@ export default async function loginToNetcity(login: string, password: string): P
     return true;
   };
 
+  let at = '';
+
+  page.on('request', (req) => {
+    const headers = req.headers();
+
+    const headerAt = headers['at'];
+
+    if (headerAt && headerAt.length) {
+      at = headerAt;
+    };
+  });
+
   try {
     await page.goto('https://dnevnik.school59-ekb.ru/', {
       waitUntil: 'networkidle0',
@@ -76,6 +88,7 @@ export default async function loginToNetcity(login: string, password: string): P
         browser,
         client,
         logoutAndCloseBrowser,
+        at,
       };
     }
 
@@ -102,6 +115,7 @@ export default async function loginToNetcity(login: string, password: string): P
       browser,
       client,
       logoutAndCloseBrowser,
+      at,
     };
   }
 
@@ -113,5 +127,6 @@ export default async function loginToNetcity(login: string, password: string): P
     browser,
     client,
     logoutAndCloseBrowser,
+    at,
   };
 }
