@@ -23,7 +23,7 @@ class NetCitySession {
 
     const id = Date.now();
 
-    const autoCloseSessionTime = 1000 * 60 * 60;
+    const autoCloseSessionTime = 1000 * 60 * 15;
     const endTime = id + autoCloseSessionTime;
 
     this.sessions.push({id, session, endTime});
