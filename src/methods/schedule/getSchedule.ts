@@ -53,7 +53,7 @@ async function getSchedule({req, res}: MethodInputData) {
     });
   }
 
-  const downloadPath = path.resolve(__dirname, '../../files/schedule');
+  const downloadPath = path.resolve(__dirname, '../../../files/schedule');
   await client.send('Page.setDownloadBehavior', {
     behavior: 'allow',
     downloadPath,
@@ -80,13 +80,13 @@ async function getSchedule({req, res}: MethodInputData) {
 
     console.log('Открыта доска объявлений.');
 
-    const announcements: Announcement[] = await page.evaluate(() => {
+    const announcements: Announcement[] = await page.evaluate(async () => {
       const announcementsTable = document.querySelector('.content')!.children[0].children[0].children[0].children[1].children[1].children[3].children[0].children[0].children[0].children;
 
       const filesElements = Array.from(document.querySelectorAll('[ng-repeat="attach in announce.attachments"]')) as HTMLElement[];
       const announcementElements = Array.from(document.querySelectorAll('[ng-repeat="announce in ctrl.data.announcements"]'));
 
-      const announcements: Announcement[] = Array.from(announcementsTable).map((announcement) => {
+      const announcements: Announcement[] = await Promise.all(Array.from(announcementsTable).map(async (announcement) => {
         const body = announcement.children[0] as HTMLElement;
 
         const title: string = body.children[0].childNodes[1].textContent!;
@@ -105,29 +105,60 @@ async function getSchedule({req, res}: MethodInputData) {
           const files = Array.from(content.children[1].children);
           files.shift();
 
-          files.map((file) => {
+          const findSelectorEnding = async (selector: string, elementIndex: number, recursed: number): Promise<string | undefined> => {
+            const maxRecursions = 10;
+            if (recursed >= maxRecursions) return;
+
+            let modifiedSelector = selector;
+
+            if (elementIndex === 1) {
+              modifiedSelector += ' > div > a';
+            } else {
+              modifiedSelector += ` > div:nth-child(${elementIndex + recursed}) > a`;
+            }
+
+            const element = document.querySelector(modifiedSelector) as HTMLElement;
+
+            if (element) {
+              const filename = element.innerText;
+              const isExists = result.files.find((file) => file.filename === filename);
+
+              // const filesJoined = result.files.map((file) => {
+              //   return file.filename;
+              // }).join();
+
+              // console.log(isExists, result.files, filesJoined, filename, element);
+
+              if (isExists) return findSelectorEnding(selector, elementIndex, recursed + 1);
+              return modifiedSelector;
+            } else {
+              return findSelectorEnding(selector, elementIndex, recursed + 1);
+            }
+          };
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
             const link = file.children[0] as HTMLElement;
             const filename = link.innerText;
 
             const fileElementIndex = filesElements.findIndex((fileElement) => fileElement.innerText === filename)! + 1;
 
-            let selector = `#view > div:nth-child(4) > div > form > div > div:nth-child(${announcementIndex}) > div.adver-body > div.adver-content.ng-scope > div.fieldset.ng-scope`;
+            const selector = `#view > div:nth-child(4) > div > form > div > div:nth-child(${announcementIndex}) > div.adver-body > div.adver-content.ng-scope > div.fieldset.ng-scope`;
 
-            if (fileElementIndex === 1) {
-              selector += ' > div > a';
-            } else {
-              selector += ` > div:nth-child(${fileElementIndex}) > a`;
-            }
+            const endedSelector = await findSelectorEnding(selector, fileElementIndex, 0);
+
+            // console.log(i, 'found sel', endedSelector);
 
             result.files.push({
               filename,
-              selector,
+              selector: endedSelector,
             });
-          });
+          }
         }
 
         return result;
-      });
+      }));
 
       return announcements;
     });
@@ -145,7 +176,9 @@ async function getSchedule({req, res}: MethodInputData) {
     });
 
     await Promise.all(scheduleFiles.map(async (file, index) => {
-      const waiting = index * 2000;
+      if (!file.selector) return console.log(`Не удалось найти selector для файла ${file.filename}`);
+
+      const waiting = index * 3500;
       await waitMs(waiting - 1, waiting, true, `Скачивание файла: ${file.filename}`);
 
       await page.click(file.selector);
