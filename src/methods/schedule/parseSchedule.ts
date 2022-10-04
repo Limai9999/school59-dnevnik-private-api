@@ -29,7 +29,7 @@ async function parseSchedule({req, res}: MethodInputData) {
 
     const workbook = new Excel.Workbook();
 
-    const filePath = path.resolve(__dirname, '../../files/schedule', filename);
+    const filePath = path.resolve(__dirname, '../../../files/schedule', filename);
     await workbook.xlsx.readFile(filePath);
 
     let classColumn = 0;

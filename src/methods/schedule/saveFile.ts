@@ -25,7 +25,7 @@ async function saveFile({req, res}: MethodInputData) {
     });
   }
 
-  const downloadPath = path.resolve(__dirname, '../../files/schedule', filename);
+  const downloadPath = path.resolve(__dirname, '../../../files/schedule', filename);
   const writer = createWriteStream(downloadPath);
 
   const response = await fetch(url, {
