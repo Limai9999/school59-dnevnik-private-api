@@ -11,22 +11,22 @@ type ScheduleData = {
 }
 
 async function parseSchedule({req, res}: MethodInputData) {
+  if (!req.body) {
+    res.json({
+      status: false,
+      error: 'Не введены filename и className',
+    });
+  }
+
+  const {filename, className}: ScheduleData = req.body;
+  if (!filename || !className) {
+    return res.json({
+      status: false,
+      error: 'Название файла и имя класса не введены.',
+    });
+  }
+
   try {
-    if (!req.body) {
-      res.json({
-        status: false,
-        message: 'Не введены filename и className',
-      });
-    }
-
-    const {filename, className}: ScheduleData = req.body;
-    if (!filename || !className) {
-      return res.json({
-        status: false,
-        message: 'Название файла и имя класса не введены.',
-      });
-    }
-
     const workbook = new Excel.Workbook();
 
     const filePath = path.resolve(__dirname, '../../../files/schedule', filename);
@@ -44,7 +44,7 @@ async function parseSchedule({req, res}: MethodInputData) {
       console.log('error parseSchedule', 'no class column', filename);
       return res.json({
         status: false,
-        message: `Не удалось найти столбец класса ${className}.\nПри добавлении класса буква должна быть такая же, как и в табличном расписании, т.е с учётом регистра.`,
+        error: `Не удалось найти столбец класса ${className}.\nПри добавлении класса буква должна быть такая же, как и в табличном расписании, т.е с учётом регистра.`,
         filename,
       });
     }
@@ -179,21 +179,23 @@ async function parseSchedule({req, res}: MethodInputData) {
       date,
       filename,
       room,
-      creationTime: Math.floor(fileStats.birthtimeMs),
+      creationTime: Math.floor(fileStats.mtimeMs),
     };
 
     console.log(`Расписание "${filename}" успешно спарщено.`);
 
     res.json({
       status: true,
-      message: returning,
+      filename,
+      schedule: returning,
     });
   } catch (error) {
     console.log('Ошибка в parseSchedule', error);
 
     res.json({
       status: false,
-      message: `${error}`,
+      filename,
+      error: `${error}`,
     });
   }
 }
