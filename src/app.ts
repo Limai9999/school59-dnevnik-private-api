@@ -2,16 +2,18 @@ import express from 'express';
 
 import fs from 'fs';
 import path from 'path';
-
-import {AppLocals} from './types/methods/RequestLocals';
+import logger from 'morgan';
 
 import NetCitySession from './modules/NetCitySession';
 import Utils from './modules/Utils';
 
+import {AppLocals} from './types/methods/RequestLocals';
+
 const app = express();
 
+app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({extended: false}));
 
 const PORT = 2077;
 
