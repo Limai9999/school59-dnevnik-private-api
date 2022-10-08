@@ -6,6 +6,7 @@ import path from 'path';
 import {AppLocals} from './types/methods/RequestLocals';
 
 import NetCitySession from './modules/NetCitySession';
+import Utils from './modules/Utils';
 
 const app = express();
 
@@ -15,10 +16,12 @@ app.use(express.urlencoded({extended: true}));
 const PORT = 2077;
 
 const netcitySession = new NetCitySession();
+const utils = new Utils();
 
 async function start(): Promise<void> {
   app.locals = {
     netcitySession,
+    utils,
   } as AppLocals;
 
   const routersDir = fs.readdirSync(path.join(__dirname, 'routers'));
