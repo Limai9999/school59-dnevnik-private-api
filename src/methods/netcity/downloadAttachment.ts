@@ -4,6 +4,8 @@ import fetch from 'node-fetch';
 import path from 'path';
 import {createWriteStream} from 'fs';
 
+const isTest = false;
+
 async function downloadAttachment({req, res}: MethodInputData) {
   const {netcitySession, utils} = req.app.locals;
 
@@ -15,7 +17,7 @@ async function downloadAttachment({req, res}: MethodInputData) {
   }
 
   const {sessionId, attachmentId, filename}: {sessionId: number, attachmentId: number, filename: string} = req.body;
-  if (!sessionId || !attachmentId) {
+  if (!sessionId || (!attachmentId && attachmentId !== 0)) {
     return res.json({
       status: false,
       error: 'Вы не ввели название файла, либо ID файла или сессии.',
@@ -27,6 +29,13 @@ async function downloadAttachment({req, res}: MethodInputData) {
     return res.json({
       status: false,
       error: 'Сессия устарела.',
+    });
+  }
+
+  if (isTest) {
+    return res.json({
+      status: true,
+      filename,
     });
   }
 
