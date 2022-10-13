@@ -1,4 +1,4 @@
-import {LoginToNetcity} from '../types/Responses/LoginToNetcity';
+import {LoginToNetcity} from '../types/Utils/LoginToNetcity';
 
 type Session = {
   id: number

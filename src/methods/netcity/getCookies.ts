@@ -1,8 +1,8 @@
 
 
-import {MethodInputData} from '../../types/methods/MethodInputData';
+import {MethodInputData} from '../../types/Methods/MethodInputData';
 
-import {Credentials} from '../../types/netcity/Credentials';
+import {Credentials} from '../../types/Netcity/Credentials';
 
 import loginToNetcity from '../../utils/loginToNetcity';
 

@@ -1,4 +1,4 @@
-import {MethodInputData} from '../../types/methods/MethodInputData';
+import {MethodInputData} from '../../types/Methods/MethodInputData';
 
 import fetch from 'node-fetch';
 import path from 'path';

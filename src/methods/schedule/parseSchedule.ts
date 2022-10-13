@@ -3,7 +3,7 @@ import path from 'path';
 
 import {statSync} from 'fs';
 
-import {MethodInputData} from '../../types/methods/MethodInputData';
+import {MethodInputData} from '../../types/Methods/MethodInputData';
 
 type ScheduleData = {
   filename: string

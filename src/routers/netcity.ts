@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import {MethodInputData} from '../types/methods/MethodInputData';
+import {MethodInputData} from '../types/Methods/MethodInputData';
 
 import getCookies from '../methods/netcity/getCookies';
 import closeSession from '../methods/netcity/closeSession';

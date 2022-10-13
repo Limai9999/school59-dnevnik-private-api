@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 
-import {LoginToNetcity} from '../types/Responses/LoginToNetcity';
+import {LoginToNetcity} from '../types/Utils/LoginToNetcity';
 
 export default async function loginToNetcity(login: string, password: string): Promise<LoginToNetcity> {
   const browser = await puppeteer.launch({

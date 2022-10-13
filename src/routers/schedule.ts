@@ -5,7 +5,7 @@ import getSchedule from '../methods/schedule/getSchedule';
 import parseSchedule from '../methods/schedule/parseSchedule';
 import saveFile from '../methods/schedule/saveFile';
 
-import {MethodInputData} from '../types/methods/MethodInputData';
+import {MethodInputData} from '../types/Methods/MethodInputData';
 
 router.get('/get', (req, res) => getSchedule({req, res} as MethodInputData));
 router.get('/parse', (req, res) => parseSchedule({req, res} as MethodInputData));

@@ -1,4 +1,4 @@
-import {MethodInputData} from '../../types/methods/MethodInputData';
+import {MethodInputData} from '../../types/Methods/MethodInputData';
 
 async function closeSession({req, res}: MethodInputData) {
   const {netcitySession} = req.app.locals;
@@ -6,7 +6,7 @@ async function closeSession({req, res}: MethodInputData) {
   if (!req.body) {
     return res.json({
       status: false,
-      error: 'sessionId не введены.',
+      message: 'sessionId не введены.',
     });
   }
 
@@ -14,7 +14,7 @@ async function closeSession({req, res}: MethodInputData) {
   if (!sessionId) {
     return res.json({
       status: false,
-      error: 'ID сессии не введён.',
+      message: 'ID сессии не введён.',
     });
   }
 
@@ -22,7 +22,7 @@ async function closeSession({req, res}: MethodInputData) {
 
   return res.json({
     status: closeStatus,
-    error: closeStatus ? '' : 'Такой сессии не существует, либо она уже закрыта.',
+    message: closeStatus ? '' : 'Такой сессии не существует, либо она уже закрыта.',
   });
 }
 

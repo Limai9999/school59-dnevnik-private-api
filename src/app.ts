@@ -7,7 +7,7 @@ import logger from 'morgan';
 import NetCitySession from './modules/NetCitySession';
 import Utils from './modules/Utils';
 
-import {AppLocals} from './types/methods/RequestLocals';
+import {AppLocals} from './types/Methods/RequestLocals';
 
 const app = express();
 

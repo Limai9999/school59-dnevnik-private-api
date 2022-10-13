@@ -2,12 +2,12 @@ import path from 'path';
 
 import waitMs from '../../utils/waitMs';
 
-import {Credentials} from '../../types/netcity/Credentials';
-import {Announcement, AnnouncementFile} from '../../types/schedule/Announcement';
+import {Credentials} from '../../types/Netcity/Credentials';
+import {Announcement, AnnouncementFile} from '../../types/Schedule/Announcement';
 
-import {MethodInputData} from '../../types/methods/MethodInputData';
+import {MethodInputData} from '../../types/Methods/MethodInputData';
 
-import {Tests} from '../../types/schedule/Tests';
+import {Tests} from '../../types/Schedule/Tests';
 import loginToNetcity from '../../utils/loginToNetcity';
 
 const test: Tests = {
