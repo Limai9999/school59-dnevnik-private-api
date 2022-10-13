@@ -165,7 +165,7 @@ async function parseSchedule({req, res}: MethodInputData) {
         date = date.replace('.xlsx', '');
       }
     } catch (error) {
-      console.log('error parseSchedule', error, filename);
+      console.log('ошибка при получении даты расписания ParseSchedule', error, filename);
       date = 'неизвестно';
     }
 
