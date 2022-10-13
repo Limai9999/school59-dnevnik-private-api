@@ -5,8 +5,6 @@ import path from 'path';
 import {createWriteStream} from 'fs';
 import {DownloadAttachmentResponse} from '../../types/Responses/netCity/DownloadAttachmentResponse';
 
-const isTest = false;
-
 async function downloadAttachment({req, res}: MethodInputData) {
   const {netcitySession, utils} = req.app.locals;
 
@@ -18,7 +16,7 @@ async function downloadAttachment({req, res}: MethodInputData) {
     return res.json(response);
   }
 
-  const {sessionId, attachmentId, filename}: {sessionId: number, attachmentId: number, filename: string} = req.body;
+  const {sessionId, attachmentId, filename, isTest}: {sessionId: number, attachmentId: number, filename: string, isTest: boolean} = req.body;
   if (!sessionId || (!attachmentId && attachmentId !== 0)) {
     const response: DownloadAttachmentResponse = {
       status: false,
