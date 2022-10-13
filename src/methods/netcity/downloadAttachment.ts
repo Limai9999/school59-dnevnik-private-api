@@ -3,6 +3,7 @@ import {MethodInputData} from '../../types/Methods/MethodInputData';
 import fetch from 'node-fetch';
 import path from 'path';
 import {createWriteStream} from 'fs';
+import {DownloadAttachmentResponse} from '../../types/Responses/netCity/DownloadAttachmentResponse';
 
 const isTest = false;
 
@@ -10,33 +11,37 @@ async function downloadAttachment({req, res}: MethodInputData) {
   const {netcitySession, utils} = req.app.locals;
 
   if (!req.body) {
-    return res.json({
+    const response: DownloadAttachmentResponse = {
       status: false,
       error: 'sessionId и attachmentId и filename не введены.',
-    });
+    };
+    return res.json(response);
   }
 
   const {sessionId, attachmentId, filename}: {sessionId: number, attachmentId: number, filename: string} = req.body;
   if (!sessionId || (!attachmentId && attachmentId !== 0)) {
-    return res.json({
+    const response: DownloadAttachmentResponse = {
       status: false,
       error: 'Вы не ввели название файла, либо ID файла или сессии.',
-    });
+    };
+    return res.json(response);
   }
 
   const session = netcitySession.getSession(sessionId);
   if (!session) {
-    return res.json({
+    const response: DownloadAttachmentResponse = {
       status: false,
       error: 'Сессия устарела.',
-    });
+    };
+    return res.json(response);
   }
 
   if (isTest) {
-    return res.json({
+    const response: DownloadAttachmentResponse = {
       status: true,
       filename,
-    });
+    };
+    return res.json(response);
   }
 
   const {session: {at, page}} = session;
@@ -58,18 +63,21 @@ async function downloadAttachment({req, res}: MethodInputData) {
 
   writer.on('error', (error) => {
     console.log('Ошибка при сохранении файла:', error);
-    return res.json({
+
+    const response: DownloadAttachmentResponse = {
       status: false,
       error: error.message,
       filename,
-    });
+    };
+    return res.json(response);
   });
 
   writer.on('close', () => {
-    return res.json({
+    const response: DownloadAttachmentResponse = {
       status: true,
       filename,
-    });
+    };
+    return res.json(response);
   });
 
   writer.on('finish', writer.close);

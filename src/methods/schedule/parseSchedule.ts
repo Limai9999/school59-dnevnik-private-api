@@ -5,6 +5,8 @@ import {statSync} from 'fs';
 
 import {MethodInputData} from '../../types/Methods/MethodInputData';
 
+import {ParseScheduleResponse} from '../../types/Responses/schedule/ParseScheduleResponse';
+
 type ScheduleData = {
   filename: string
   className: string
@@ -12,18 +14,20 @@ type ScheduleData = {
 
 async function parseSchedule({req, res}: MethodInputData) {
   if (!req.body) {
-    res.json({
+    const response: ParseScheduleResponse = {
       status: false,
       error: 'Не введены filename и className',
-    });
+    };
+    return res.json(response);
   }
 
   const {filename, className}: ScheduleData = req.body;
   if (!filename || !className) {
-    return res.json({
+    const response: ParseScheduleResponse = {
       status: false,
       error: 'Название файла и имя класса не введены.',
-    });
+    };
+    return res.json(response);
   }
 
   try {
@@ -42,11 +46,13 @@ async function parseSchedule({req, res}: MethodInputData) {
     // ошибка если класс не найден
     if (!classColumn) {
       console.log('error parseSchedule', 'no class column', filename);
-      return res.json({
+
+      const response: ParseScheduleResponse = {
         status: false,
-        error: `Не удалось найти столбец класса ${className}.\nПри добавлении класса буква должна быть такая же, как и в табличном расписании, т.е с учётом регистра.`,
+        error: `Не удалось найти столбец класса ${className}.\nПри добавлении класса буква должна быть точно такая же, как и в табличном расписании, т.е. с учётом регистра.`,
         filename,
-      });
+      };
+      return res.json(response);
     }
 
     // масcивы информации
@@ -95,7 +101,7 @@ async function parseSchedule({req, res}: MethodInputData) {
       }
     }
 
-    // сопоставление времени, предмета и кабинета в обьект и добавление в массив + понимание когда начинаются уроки
+    // сопоставление времени, предмета и кабинета в объект и добавление в массив + понимание когда начинаются уроки
     const preResult = [];
     let startTime = '';
     let room = 0;
@@ -184,19 +190,21 @@ async function parseSchedule({req, res}: MethodInputData) {
 
     console.log(`Расписание "${filename}" успешно спарщено.`);
 
-    res.json({
+    const response: ParseScheduleResponse = {
       status: true,
       filename,
       schedule: returning,
-    });
+    };
+    return res.json(response);
   } catch (error) {
     console.log('Ошибка в parseSchedule', error);
 
-    res.json({
+    const response: ParseScheduleResponse = {
       status: false,
       filename,
       error: `${error}`,
-    });
+    };
+    return res.json(response);
   }
 }
 
