@@ -166,8 +166,6 @@ async function parseSchedule({req, res}: MethodInputData) {
         if (splitted[5]) date = `${splitted[4]} ${splitted[5]}`;
         date = date.replace('.xlsx', '');
       }
-
-      date = null;
     } catch (error) {
       console.log('ошибка при получении даты расписания ParseSchedule', error, filename);
       date = null;
