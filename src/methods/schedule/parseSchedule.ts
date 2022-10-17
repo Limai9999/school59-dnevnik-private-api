@@ -154,19 +154,23 @@ async function parseSchedule({req, res}: MethodInputData) {
     });
 
     // получение даты из названия файла
-    const splitted = filename.split(' ');
-    let date = '';
+    let date: string | null;
 
     try {
+      const splittedFilenameBySpaces = filename.split('_').join(' ').split(' ').join(' ');
+      const splitted = splittedFilenameBySpaces.split(' ');
+
       date = splitted.length > 3 ? `${splitted[2]} ${splitted[3]}`.replace('.xlsx', '') : splitted[2].replace('.xlsx', '');
-      if (filename.startsWith('изменения в расписании на')) {
+      if (splittedFilenameBySpaces.startsWith('изменения в расписании на')) {
         date = splitted[4];
         if (splitted[5]) date = `${splitted[4]} ${splitted[5]}`;
         date = date.replace('.xlsx', '');
       }
+
+      date = null;
     } catch (error) {
       console.log('ошибка при получении даты расписания ParseSchedule', error, filename);
-      date = 'неизвестно';
+      date = null;
     }
 
     const objectedSchedule = schedule.map((scheduleString) => {
