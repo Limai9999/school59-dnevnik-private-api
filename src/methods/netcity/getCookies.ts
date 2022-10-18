@@ -11,6 +11,8 @@ async function getCookies({req, res}: MethodInputData) {
   if (!req.body) {
     const response: GetCookiesResponse = {
       status: false,
+      login: '',
+      password: '',
       error: 'login и password не введены.',
     };
     return res.json(response);
@@ -20,6 +22,8 @@ async function getCookies({req, res}: MethodInputData) {
   if (!login || !password) {
     const response: GetCookiesResponse = {
       status: false,
+      login: '',
+      password: '',
       error: 'Логин и пароль не введены.',
     };
     return res.json(response);
@@ -32,6 +36,8 @@ async function getCookies({req, res}: MethodInputData) {
   if (!loginData.status) {
     const response: GetCookiesResponse = {
       status: false,
+      login,
+      password,
       error: loginData.error!,
       session: {id: 0, endTime: 0},
       at: loginData.at,
@@ -46,6 +52,8 @@ async function getCookies({req, res}: MethodInputData) {
 
   const response: GetCookiesResponse = {
     status: true,
+    login,
+    password,
     session,
     at: loginData.at,
     cookies,
