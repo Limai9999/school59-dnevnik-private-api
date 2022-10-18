@@ -4,7 +4,7 @@ import {LoginToNetcity} from '../types/Utils/LoginToNetcity';
 
 export default async function loginToNetcity(login: string, password: string): Promise<LoginToNetcity> {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     defaultViewport: null,
     args: ['--no-sandbox'],
   });
@@ -24,6 +24,21 @@ export default async function loginToNetcity(login: string, password: string): P
     await page.waitForNetworkIdle();
 
     await browser.close();
+
+    return true;
+  };
+
+  const skipSecurityCheck = async () => {
+    await page.evaluate(() => {
+      const title = document.querySelector('.title') as HTMLElement;
+
+      if (title.innerText === 'Предупреждение о безопасности') {
+        // @ts-ignore
+        doContinue();
+      }
+    });
+
+    await page.waitForNetworkIdle({idleTime: 3000});
 
     return true;
   };
@@ -83,39 +98,35 @@ export default async function loginToNetcity(login: string, password: string): P
 
       return {
         status: false,
+        login,
+        password,
         error: `${title} - ${description}`,
         page,
         browser,
         client,
         logoutAndCloseBrowser,
         at,
+        skipSecurityCheck,
       };
     }
 
     await page.waitForNetworkIdle({idleTime: 2000});
 
-    // пройти предупреждение о безопасности
-    await page.evaluate(() => {
-      const title = document.querySelector('.title') as HTMLElement;
-
-      if (title.innerText === 'Предупреждение о безопасности') {
-        // @ts-ignore
-        doContinue();
-      }
-    });
-
-    await page.waitForNetworkIdle({idleTime: 3000});
+    await skipSecurityCheck();
   } catch (error) {
     console.log(`Не удалось войти в Сетевой Город через профиль ${login}.`);
 
     return {
       status: false,
+      login,
+      password,
       error: `${error}`,
       page,
       browser,
       client,
       logoutAndCloseBrowser,
       at,
+      skipSecurityCheck,
     };
   }
 
@@ -123,10 +134,13 @@ export default async function loginToNetcity(login: string, password: string): P
 
   return {
     status: true,
+    login,
+    password,
     page,
     browser,
     client,
     logoutAndCloseBrowser,
     at,
+    skipSecurityCheck,
   };
 }
