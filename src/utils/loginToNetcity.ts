@@ -13,6 +13,11 @@ export default async function loginToNetcity(login: string, password: string): P
 
   const page = await browser.newPage();
 
+  await page.setViewport({
+    width: 2048,
+    height: 1152,
+  });
+
   const client = await page.target().createCDPSession();
 
   const logoutAndCloseBrowser = async () => {
