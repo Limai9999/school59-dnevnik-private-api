@@ -174,9 +174,8 @@ async function getTotalStudentReport({req, res}: MethodInputData) {
     const reportTableElement = await page.$('.table-print');
     if (reportTableElement) {
       await reportTableElement.screenshot({path: reportScreenshotPath});
+      reportResult.screenshot = screenshotName;
     }
-
-    reportResult.screenshot = screenshotName;
 
     res.json(reportResult);
   } catch (error) {
