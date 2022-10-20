@@ -2,7 +2,7 @@ import path from 'path';
 
 import {MethodInputData} from '../../types/Methods/MethodInputData';
 
-import {AverageGrade, DayData, ReportResult} from '../../types/Responses/grades/GetTotalStudentReport';
+import {AverageGrade, DayData, ReportResult} from '../../types/Responses/grades/GetTotalStudentReportResponse';
 
 async function getTotalStudentReport({req, res}: MethodInputData) {
   try {
