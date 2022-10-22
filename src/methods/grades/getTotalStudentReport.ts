@@ -58,13 +58,13 @@ async function getTotalStudentReport({req, res}: MethodInputData) {
 
     await skipSecurityCheck();
 
-    await page.waitForSelector('[ng-href="studenttotal"]');
+    await page.waitForNetworkIdle();
     await page.click('[ng-href="studenttotal"]');
 
-    await page.waitForNetworkIdle({idleTime: 3000});
+    await page.waitForNetworkIdle();
     await page.click('[title="Сформировать"]');
 
-    await page.waitForNetworkIdle({idleTime: 1500});
+    await page.waitForSelector('#report');
 
     const reportResult: ReportResult = await page.evaluate(() => {
       try {

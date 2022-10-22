@@ -4,7 +4,7 @@ import {LoginToNetcity} from '../types/Utils/LoginToNetcity';
 
 export default async function loginToNetcity(login: string, password: string): Promise<LoginToNetcity> {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     defaultViewport: null,
     args: ['--no-sandbox'],
   });
@@ -43,7 +43,7 @@ export default async function loginToNetcity(login: string, password: string): P
       }
     });
 
-    await page.waitForNetworkIdle({idleTime: 3000});
+    await page.waitForNetworkIdle();
 
     return true;
   };
@@ -75,7 +75,7 @@ export default async function loginToNetcity(login: string, password: string): P
     await page.keyboard.press('Enter');
 
     console.log('Данные введены, идёт вход...');
-    await page.waitForNetworkIdle({idleTime: 3000});
+    await page.waitForNetworkIdle();
 
     const modalData = await page.evaluate(() => {
       const modal = document.querySelector('.modal-dialog');
@@ -87,6 +87,8 @@ export default async function loginToNetcity(login: string, password: string): P
 
       const title = header.innerText.replace('×\n', '');
       const description = body.innerText.replace('×\n', '');
+
+      if (title.includes('Внимание')) return;
 
       return {
         title,
@@ -115,7 +117,7 @@ export default async function loginToNetcity(login: string, password: string): P
       };
     }
 
-    await page.waitForNetworkIdle({idleTime: 2000});
+    await page.waitForNetworkIdle();
 
     await skipSecurityCheck();
   } catch (error) {
