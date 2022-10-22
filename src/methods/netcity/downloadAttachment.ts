@@ -29,7 +29,7 @@ async function downloadAttachment({req, res}: MethodInputData) {
   if (!session) {
     const response: DownloadAttachmentResponse = {
       status: false,
-      error: 'Сессия устарела.',
+      error: 'Сессия устарела.\n\nПерезайдите в Сетевой Город.',
     };
     return res.json(response);
   }

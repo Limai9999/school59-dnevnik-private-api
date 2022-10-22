@@ -39,7 +39,7 @@ async function getTotalStudentReport({req, res}: MethodInputData) {
     if (!session) {
       const response: ReportResult = {
         status: false,
-        error: 'Сессия устарела.',
+        error: 'Сессия устарела.\n\nПерезайдите в Сетевой Город.',
         info: [],
         result: {
           averageGrades: [],
