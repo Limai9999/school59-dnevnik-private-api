@@ -9,6 +9,8 @@ import Utils from './modules/Utils';
 
 import {AppLocals} from './types/Methods/RequestLocals';
 
+process.setMaxListeners(30);
+
 const app = express();
 
 app.use(logger('dev'));
