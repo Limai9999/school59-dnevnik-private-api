@@ -4,7 +4,7 @@ import {LoginToNetcity} from '../types/Utils/LoginToNetcity';
 
 export default async function loginToNetcity(login: string, password: string): Promise<LoginToNetcity> {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     defaultViewport: null,
     args: ['--no-sandbox'],
   });
