@@ -49,7 +49,7 @@ class NetCitySession {
 
     setTimeout(() => {
       session.session.logoutAndCloseBrowser();
-    }, 75000);
+    }, 1000 * 60 * 3 + 1000 * 20);
 
     this.sessions = this.sessions.filter((session) => session.id !== id);
 
