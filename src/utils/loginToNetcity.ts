@@ -35,11 +35,11 @@ export default async function loginToNetcity(login: string, password: string): P
 
   const skipSecurityCheck = async () => {
     await page.evaluate(() => {
-      const title = document.querySelector('.title') as HTMLElement;
-
-      if (title.innerText === 'Предупреждение о безопасности') {
+      try {
         // @ts-ignore
         doContinue();
+      } catch (error) {
+        console.log('Не удалось пропустить предупреждение о безопасности, либо его нет.');
       }
     });
 

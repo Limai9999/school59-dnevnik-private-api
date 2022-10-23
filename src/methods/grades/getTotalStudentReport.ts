@@ -56,6 +56,8 @@ async function getTotalStudentReport({req, res}: MethodInputData) {
       SetSelectedTab(24, '/angular/school/reports/');
     });
 
+    await page.waitForNetworkIdle();
+
     await skipSecurityCheck();
 
     await page.waitForNetworkIdle();
