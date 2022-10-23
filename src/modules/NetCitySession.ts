@@ -47,7 +47,9 @@ class NetCitySession {
     const session = this.getSession(id);
     if (!session) return false;
 
-    await session.session.logoutAndCloseBrowser();
+    setTimeout(() => {
+      session.session.logoutAndCloseBrowser();
+    }, 75000);
 
     this.sessions = this.sessions.filter((session) => session.id !== id);
 
