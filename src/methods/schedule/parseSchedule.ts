@@ -104,7 +104,7 @@ async function parseSchedule({req, res}: MethodInputData) {
     // сопоставление времени, предмета и кабинета в объект и добавление в массив + понимание когда начинаются уроки
     const preResult = [];
     let startTime = '';
-    let room = 0;
+    let room = '';
 
     for (let i = 0; i < timeArr.length; i++) {
       if (!timeArr[i] && !lessonsArr[i] && !classRoomsArr[i]) continue;
@@ -115,7 +115,7 @@ async function parseSchedule({req, res}: MethodInputData) {
         startTime = time.split('-')[0];
       }
       if (classRoomsArr[i] && !room) {
-        room = classRoomsArr[i]! as number;
+        room = String(classRoomsArr[i]!);
       }
       preResult.push({
         time: timeArr[i],
@@ -178,7 +178,7 @@ async function parseSchedule({req, res}: MethodInputData) {
 
     const fileStats = statSync(filePath);
 
-    const returning = {
+    const returning: ParseScheduleResponse['schedule'] = {
       distant: false,
       schedule,
       objectedSchedule,
