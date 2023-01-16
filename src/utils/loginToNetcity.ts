@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer';
 
 import {LoginToNetcity} from '../types/Utils/LoginToNetcity';
+import waitMs from './waitMs';
 
 export default async function loginToNetcity(login: string, password: string): Promise<LoginToNetcity> {
   const browser = await puppeteer.launch({
@@ -27,6 +28,7 @@ export default async function loginToNetcity(login: string, password: string): P
     });
 
     await page.waitForNetworkIdle();
+    await waitMs(10000, 15000, true, `Завершение сессии пользователя ${login}`);
 
     await browser.close();
 
@@ -137,7 +139,7 @@ export default async function loginToNetcity(login: string, password: string): P
     };
   }
 
-  console.log(`Вход в Сетевой Город через профиль ${login} успешно завершён.`);
+  console.log(`Вход в Сетевой Город через профиль ${login} завершён.`);
 
   return {
     status: true,
