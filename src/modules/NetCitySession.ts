@@ -6,11 +6,20 @@ type Session = {
   session: LoginToNetcity
 }
 
+type SecuritySkipInterval = {
+  id: number
+  interval: NodeJS.Timer;
+}
+
 class NetCitySession {
   sessions: Session[];
 
+  securitySkipIntervals: SecuritySkipInterval[];
+
   constructor() {
     this.sessions = [];
+
+    this.securitySkipIntervals = [];
   }
 
   addSession(session: LoginToNetcity): {id: number, endTime: number} {
@@ -32,6 +41,16 @@ class NetCitySession {
       this.closeSession(id);
     }, autoCloseSessionTime);
 
+    const securitySkipInterval = setInterval(() => {
+      session.skipSecurityCheck();
+    }, 5000);
+    this.securitySkipIntervals.push({
+      id,
+      interval: securitySkipInterval,
+    });
+
+    console.log(`Добавлена сессия ${id} пользователя ${session.login}`);
+
     return {
       id,
       endTime,
@@ -49,9 +68,14 @@ class NetCitySession {
 
     setTimeout(() => {
       session.session.logoutAndCloseBrowser();
-    }, 1000 * 60 * 3 + 1000 * 20);
+    }, 1000 * 60 * 1);
+
+    const securitySkipInterval = this.securitySkipIntervals.find((intervals) => intervals.id === id);
+    if (securitySkipInterval) clearInterval(securitySkipInterval.interval);
 
     this.sessions = this.sessions.filter((session) => session.id !== id);
+
+    console.log(`Закрыта сессия ${id} пользователя ${session.session.login}`);
 
     return true;
   }
