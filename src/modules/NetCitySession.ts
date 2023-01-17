@@ -43,7 +43,7 @@ class NetCitySession {
 
     const securitySkipInterval = setInterval(() => {
       session.skipSecurityCheck();
-    }, 5000);
+    }, 15000);
     this.securitySkipIntervals.push({
       id,
       interval: securitySkipInterval,
