@@ -130,5 +130,6 @@ dist
 .pnp.*
 
 files/*/*.xlsx
+files/*/*.xls
 files/*/*.png
 build/
