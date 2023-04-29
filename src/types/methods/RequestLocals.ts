@@ -1,4 +1,4 @@
-import {Application, Request} from 'express';
+import { Application, Request } from 'express';
 
 import NetCitySession from '../../modules/NetCitySession';
 import Utils from '../../modules/Utils';

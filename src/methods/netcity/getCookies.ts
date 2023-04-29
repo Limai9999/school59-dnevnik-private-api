@@ -1,13 +1,11 @@
+import { MethodInputData } from '../../types/Methods/MethodInputData';
+import { Credentials } from '../../types/Netcity/Credentials';
 
-
-import {MethodInputData} from '../../types/Methods/MethodInputData';
-import {Credentials} from '../../types/Netcity/Credentials';
-
-import {GetCookiesResponse} from '../../types/Responses/netCity/GetCookiesResponse';
+import { GetCookiesResponse } from '../../types/Responses/netCity/GetCookiesResponse';
 
 import loginToNetcity from '../../utils/loginToNetcity';
 
-async function getCookies({req, res}: MethodInputData) {
+async function getCookies({ req, res }: MethodInputData) {
   if (!req.body) {
     const response: GetCookiesResponse = {
       status: false,
@@ -18,7 +16,7 @@ async function getCookies({req, res}: MethodInputData) {
     return res.json(response);
   }
 
-  const {login, password}: Credentials = req.body;
+  const { login, password }: Credentials = req.body;
   if (!login || !password) {
     const response: GetCookiesResponse = {
       status: false,
@@ -29,7 +27,7 @@ async function getCookies({req, res}: MethodInputData) {
     return res.json(response);
   }
 
-  const {netcitySession} = req.app.locals;
+  const { netcitySession } = req.app.locals;
 
   const loginData = await loginToNetcity(login, password);
 
@@ -39,7 +37,7 @@ async function getCookies({req, res}: MethodInputData) {
       login,
       password,
       error: loginData.error!,
-      session: {id: 0, endTime: 0},
+      session: { id: 0, endTime: 0 },
       at: loginData.at,
       cookies: [],
     };

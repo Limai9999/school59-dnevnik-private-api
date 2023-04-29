@@ -1,18 +1,18 @@
 import Excel from 'exceljs';
 import path from 'path';
 
-import {statSync} from 'fs';
+import { statSync } from 'fs';
 
-import {MethodInputData} from '../../types/Methods/MethodInputData';
+import { MethodInputData } from '../../types/Methods/MethodInputData';
 
-import {ParseScheduleResponse} from '../../types/Responses/schedule/ParseScheduleResponse';
+import { ParseScheduleResponse } from '../../types/Responses/schedule/ParseScheduleResponse';
 
 type ScheduleData = {
   filename: string
   className: string
 }
 
-async function parseSchedule({req, res}: MethodInputData) {
+async function parseSchedule({ req, res }: MethodInputData) {
   if (!req.body) {
     const response: ParseScheduleResponse = {
       status: false,
@@ -21,7 +21,7 @@ async function parseSchedule({req, res}: MethodInputData) {
     return res.json(response);
   }
 
-  const {filename, className}: ScheduleData = req.body;
+  const { filename, className }: ScheduleData = req.body;
   if (!filename || !className) {
     const response: ParseScheduleResponse = {
       status: false,
@@ -173,7 +173,7 @@ async function parseSchedule({req, res}: MethodInputData) {
 
     const objectedSchedule = schedule.map((scheduleString) => {
       const [time, lesson, room] = scheduleString.split(' - ');
-      return {time, lesson: lesson === '-' ? null : lesson, room: room === undefined ? null : room};
+      return { time, lesson: lesson === '-' ? null : lesson, room: room === undefined ? null : room };
     });
 
     const fileStats = statSync(filePath);

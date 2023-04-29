@@ -3,14 +3,14 @@ import fetch from 'node-fetch';
 import path from 'path';
 import fs from 'fs';
 
-import {MethodInputData} from '../../types/Methods/MethodInputData';
+import { MethodInputData } from '../../types/Methods/MethodInputData';
 
-import {createWriteStream} from 'fs';
-import {DownloadAttachmentResponse} from '../../types/Responses/netCity/DownloadAttachmentResponse';
+import { createWriteStream } from 'fs';
+import { DownloadAttachmentResponse } from '../../types/Responses/netCity/DownloadAttachmentResponse';
 
-async function downloadAttachment({req, res}: MethodInputData) {
+async function downloadAttachment({ req, res }: MethodInputData) {
   try {
-    const {netcitySession, utils} = req.app.locals;
+    const { netcitySession, utils } = req.app.locals;
 
     if (!req.body) {
       const response: DownloadAttachmentResponse = {
@@ -20,7 +20,7 @@ async function downloadAttachment({req, res}: MethodInputData) {
       return res.json(response);
     }
 
-    const {sessionId, attachmentId, filename, isTest}: {sessionId: number, attachmentId: number, filename: string, isTest: boolean} = req.body;
+    const { sessionId, attachmentId, filename, isTest }: {sessionId: number, attachmentId: number, filename: string, isTest: boolean} = req.body;
     if (!sessionId || (!attachmentId && attachmentId !== 0)) {
       const response: DownloadAttachmentResponse = {
         status: false,
@@ -46,7 +46,7 @@ async function downloadAttachment({req, res}: MethodInputData) {
       return res.json(response);
     }
 
-    const {session: {at, page}} = session;
+    const { session: { at, page } } = session;
     const cookies = await page.cookies();
 
     const cookiesString = utils.cookieArrayToString(cookies);
@@ -89,7 +89,7 @@ async function downloadAttachment({req, res}: MethodInputData) {
       if (!result) {
         const response: DownloadAttachmentResponse = {
           status: false,
-          error: `Произошла ошибка при конвертировании .xls в .xlsx.\nЭто могло произойти потому что петунин еблан.`,
+          error: 'Произошла ошибка при конвертировании .xls в .xlsx.',
           filename,
         };
         return res.json(response);
@@ -122,7 +122,7 @@ async function downloadAttachment({req, res}: MethodInputData) {
   } catch (error) {
     const response: DownloadAttachmentResponse = {
       status: false,
-      error: `Произошла ошибка при скачивании файла.`,
+      error: 'Произошла ошибка при скачивании файла.',
     };
 
     return res.json(response);

@@ -1,17 +1,17 @@
 import fetch from 'node-fetch';
 import path from 'path';
-import {createWriteStream} from 'fs';
+import { createWriteStream } from 'fs';
 
-import {MethodInputData} from '../../types/Methods/MethodInputData';
+import { MethodInputData } from '../../types/Methods/MethodInputData';
 
-import {SaveFileResponse} from '../../types/Responses/schedule/SaveFileResponse';
+import { SaveFileResponse } from '../../types/Responses/schedule/SaveFileResponse';
 
 type FileData = {
   filename: string
   url: string
 }
 
-async function saveFile({req, res}: MethodInputData) {
+async function saveFile({ req, res }: MethodInputData) {
   if (!req.body) {
     const response: SaveFileResponse = {
       status: false,
@@ -20,7 +20,7 @@ async function saveFile({req, res}: MethodInputData) {
     return res.json(response);
   }
 
-  const {filename, url}: FileData = req.body;
+  const { filename, url }: FileData = req.body;
   if (!filename || !url) {
     const response: SaveFileResponse = {
       status: false,

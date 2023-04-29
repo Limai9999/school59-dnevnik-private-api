@@ -1,9 +1,9 @@
-import {MethodInputData} from '../../types/Methods/MethodInputData';
+import { MethodInputData } from '../../types/Methods/MethodInputData';
 
-import {CloseSessionResponse} from '../../types/Responses/netCity/CloseSessionResponse';
+import { CloseSessionResponse } from '../../types/Responses/netCity/CloseSessionResponse';
 
-async function closeSession({req, res}: MethodInputData) {
-  const {netcitySession} = req.app.locals;
+async function closeSession({ req, res }: MethodInputData) {
+  const { netcitySession } = req.app.locals;
 
   if (!req.body) {
     const response: CloseSessionResponse = {
@@ -13,7 +13,7 @@ async function closeSession({req, res}: MethodInputData) {
     return res.json(response);
   }
 
-  const {sessionId}: {sessionId: number} = req.body;
+  const { sessionId }: {sessionId: number} = req.body;
   if (!sessionId) {
     const response: CloseSessionResponse = {
       status: false,

@@ -7,7 +7,7 @@ import logger from 'morgan';
 import NetCitySession from './modules/NetCitySession';
 import Utils from './modules/Utils';
 
-import {AppLocals} from './types/Methods/RequestLocals';
+import { AppLocals } from './types/Methods/RequestLocals';
 
 process.setMaxListeners(30);
 
@@ -15,7 +15,7 @@ const app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 
 const PORT = 2077;
 

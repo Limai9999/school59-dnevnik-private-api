@@ -1,6 +1,6 @@
-import {Response} from 'express';
+import { Response } from 'express';
 
-import {RequestLocals} from './RequestLocals';
+import { RequestLocals } from './RequestLocals';
 
 export type MethodInputData = {
   req: RequestLocals

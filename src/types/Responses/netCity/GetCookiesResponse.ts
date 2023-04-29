@@ -1,4 +1,4 @@
-import {Protocol} from 'puppeteer';
+import { Protocol } from 'puppeteer';
 
 export type GetCookiesResponse = {
   status: boolean

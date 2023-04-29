@@ -1,21 +1,21 @@
 import path from 'path';
-import {existsSync} from 'fs';
+import { existsSync } from 'fs';
 
-import {MethodInputData} from '../../types/Methods/MethodInputData';
+import { MethodInputData } from '../../types/Methods/MethodInputData';
 
-import {GetReportScreenshotResponse} from '../../types/Responses/grades/GetReportScreenshotResponse';
+import { GetReportScreenshotResponse } from '../../types/Responses/grades/GetReportScreenshotResponse';
 
-async function getReportScreenshot({req, res}: MethodInputData) {
+async function getReportScreenshot({ req, res }: MethodInputData) {
   try {
     if (!req.body) {
       const response: GetReportScreenshotResponse = {
         status: false,
-        error: `Не введен screenshotName`,
+        error: 'Не введен screenshotName',
       };
       return res.status(400).json(response);
     }
 
-    const {screenshotName}: {screenshotName: string} = req.body;
+    const { screenshotName }: {screenshotName: string} = req.body;
     if (!screenshotName) {
       const response: GetReportScreenshotResponse = {
         status: false,

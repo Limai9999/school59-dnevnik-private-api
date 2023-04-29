@@ -1,12 +1,12 @@
 import path from 'path';
 
-import {MethodInputData} from '../../types/Methods/MethodInputData';
+import { MethodInputData } from '../../types/Methods/MethodInputData';
 
-import {AverageGrade, DayData, ReportResult} from '../../types/Responses/grades/GetTotalStudentReportResponse';
+import { AverageGrade, DayData, ReportResult } from '../../types/Responses/grades/GetTotalStudentReportResponse';
 
-async function getTotalStudentReport({req, res}: MethodInputData) {
+async function getTotalStudentReport({ req, res }: MethodInputData) {
   try {
-    const {netcitySession} = req.app.locals;
+    const { netcitySession } = req.app.locals;
 
     if (!req.body) {
       const response: ReportResult = {
@@ -21,7 +21,7 @@ async function getTotalStudentReport({req, res}: MethodInputData) {
       return res.json(response);
     }
 
-    const {sessionId}: {sessionId: number} = req.body;
+    const { sessionId }: {sessionId: number} = req.body;
     if (!sessionId) {
       const response: ReportResult = {
         status: false,
@@ -49,7 +49,7 @@ async function getTotalStudentReport({req, res}: MethodInputData) {
       return res.json(response);
     }
 
-    const {session: {page, skipSecurityCheck, login}} = session;
+    const { session: { page, skipSecurityCheck, login } } = session;
 
     await page.evaluate(() => {
       // @ts-ignore
@@ -93,10 +93,10 @@ async function getTotalStudentReport({req, res}: MethodInputData) {
 
         const monthUnformatted = Array.from(gradesBody.children[0].children) as HTMLElement[];
         const monthArray = monthUnformatted
-            .filter((month) => month.innerText !== 'Предмет' && month.innerText !== 'Средняя оценка')
-            .map((month) => {
-              return {text: month.innerText, totalDays: +month.attributes[0].value};
-            });
+          .filter((month) => month.innerText !== 'Предмет' && month.innerText !== 'Средняя оценка')
+          .map((month) => {
+            return { text: month.innerText, totalDays: +month.attributes[0].value };
+          });
         const daysArray = Array.from(daysBody.children) as HTMLElement[];
 
         const daysData: DayData[] = [];
@@ -107,7 +107,7 @@ async function getTotalStudentReport({req, res}: MethodInputData) {
           if (dayIndex === monthArray[monthIndex].totalDays) {
             monthIndex++;
             dayIndex = 0;
-          };
+          }
           daysData.push({
             month: monthArray[monthIndex].text,
             day: daysArray[i - 1].innerText,
@@ -135,13 +135,13 @@ async function getTotalStudentReport({req, res}: MethodInputData) {
 
           gradesFiltered.map((e, index) => {
             const gradesResult = e.innerText
-                .trim()
-                .replace(/\s/g, '')
-                .split('')
-                // @ts-ignore
-                .filter((grade) => !isNaN(grade))
-                // @ts-ignore
-                .sort((a, b) => b - a);
+              .trim()
+              .replace(/\s/g, '')
+              .split('')
+            // @ts-ignore
+              .filter((grade) => !isNaN(grade))
+            // @ts-ignore
+              .sort((a, b) => b - a);
 
             daysData[index].lessonsWithGrades.push({
               lesson: grades[0].innerText,
@@ -176,7 +176,7 @@ async function getTotalStudentReport({req, res}: MethodInputData) {
 
     const reportTableElement = await page.$('.table-print');
     if (reportTableElement) {
-      await reportTableElement.screenshot({path: reportScreenshotPath});
+      await reportTableElement.screenshot({ path: reportScreenshotPath });
       reportResult.screenshot = screenshotName;
     }
 

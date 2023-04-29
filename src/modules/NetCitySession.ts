@@ -1,4 +1,4 @@
-import {LoginToNetcity} from '../types/Utils/LoginToNetcity';
+import { LoginToNetcity } from '../types/Utils/LoginToNetcity';
 
 type Session = {
   id: number
@@ -35,7 +35,7 @@ class NetCitySession {
     const autoCloseSessionTime = 1000 * 60 * 30;
     const endTime = id + autoCloseSessionTime;
 
-    this.sessions.push({id, session, endTime});
+    this.sessions.push({ id, session, endTime });
 
     setTimeout(() => {
       this.closeSession(id);
