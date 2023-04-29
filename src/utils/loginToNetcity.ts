@@ -5,14 +5,25 @@ import waitMs from './waitMs';
 
 export default async function loginToNetcity(login: string, password: string): Promise<LoginToNetcity> {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     defaultViewport: null,
     args: ['--no-sandbox'],
   });
 
   console.log('Браузер открыт.');
 
+  // const testPage = await browser.newPage();
+  // testPage.setContent(login);
+
   const page = await browser.newPage();
+
+  // * CHECK FOR SLOW SYSTEMS
+  // ! 2x CPU slowdown factor
+  // await page.emulateCPUThrottling(1.5);
+
+  // ! slow 3g network
+  // const slow3G = puppeteer.networkConditions['Slow 3G'];
+  // await page.emulateNetworkConditions(slow3G);
 
   await page.setViewport({
     width: 2048,
@@ -22,17 +33,22 @@ export default async function loginToNetcity(login: string, password: string): P
   const client = await page.target().createCDPSession();
 
   const logoutAndCloseBrowser = async () => {
-    await page.evaluate(() => {
-      // @ts-ignore
-      Logout();
-    });
+    try {
+      await page.evaluate(() => {
+        // @ts-ignore
+        Logout();
+      });
 
-    await page.waitForNetworkIdle();
-    await waitMs(10000, 15000, true, `Завершение сессии пользователя ${login}`);
+      await page.waitForNetworkIdle();
+      await waitMs(10000, 15000, true, `Завершение сессии пользователя ${login}`);
 
-    await browser.close();
+      await browser.close();
 
-    return true;
+      return true;
+    } catch (error) {
+      console.log('logoutAndCloseBrowser error', error);
+      return false;
+    }
   };
 
   const skipSecurityCheck = async () => {
@@ -53,12 +69,17 @@ export default async function loginToNetcity(login: string, password: string): P
   let at = '';
 
   page.on('request', (req) => {
-    const headers = req.headers();
+    try {
+      const headers = req.headers();
 
-    const headerAt = headers['at'];
+      const headerAt = headers['at'];
 
-    if (headerAt && headerAt.length) {
-      at = headerAt;
+      if (headerAt && headerAt.length) {
+        console.log('AT HAS CHANGED. PREV:', at, 'NEW:', headerAt);
+        at = headerAt;
+      }
+    } catch (error) {
+      console.log('get header at error', error);
     }
   });
 
@@ -87,16 +108,19 @@ export default async function loginToNetcity(login: string, password: string): P
 
       if (!header || !body) return;
 
-      const title = header.innerText.replace('×\n', '');
-      const description = body.innerText.replace('×\n', '');
+      const title = header.innerText.replace('×\n', '').replace('×', '');
+      const description = body.innerText.replace('×\n', '').replace('×', '');
 
-      if (title.includes('Внимание')) return;
+      if (title.includes('Внимание') || title.includes('Подождите')) return;
+      if (description.includes('Обработка')) return;
 
       return {
         title,
         description,
       };
     });
+
+    console.log('modal data check passed');
 
     if (modalData) {
       const { title, description } = modalData!;
@@ -119,11 +143,13 @@ export default async function loginToNetcity(login: string, password: string): P
       };
     }
 
-    await page.waitForNetworkIdle();
+    await page.waitForNetworkIdle({
+      idleTime: 5000,
+    });
 
     await skipSecurityCheck();
   } catch (error) {
-    console.log(`Не удалось войти в Сетевой Город через профиль ${login}.`);
+    console.log(`Не удалось войти в Сетевой Город через профиль ${login}. Ошибка:`, error);
 
     return {
       status: false,
@@ -139,9 +165,48 @@ export default async function loginToNetcity(login: string, password: string): P
     };
   }
 
+  console.log('Waiting for AT Token', login);
+
+  let isWaitingTimeoutPassed = false;
+  const waitingForATTokenTimeout = setTimeout(() => {
+    console.log('AT Token timeout passed', login);
+    isWaitingTimeoutPassed = true;
+  }, 30000);
+
+  await new Promise<void>((resolve) => {
+    const checkForTimeoutEnd = setInterval(() => {
+      if (at.length > 0 || isWaitingTimeoutPassed) {
+        resolve();
+        clearInterval(checkForTimeoutEnd);
+      }
+    }, 1000);
+  });
+
+  console.log('cleared AT Token timeout', login);
+  clearInterval(waitingForATTokenTimeout);
+
+  if (!at.length) {
+    console.log('UNABLE TO GET AT TOKEN', login);
+
+    return {
+      status: false,
+      error: 'Не удалось получить AT токен для работы с API Сетевого Города.',
+      login,
+      password,
+      page,
+      browser,
+      client,
+      logoutAndCloseBrowser,
+      at,
+      skipSecurityCheck,
+    } as LoginToNetcity;
+  } else {
+    console.log('GOT AT TOKEN:', at, login);
+  }
+
   console.log(`Вход в Сетевой Город через профиль ${login} завершён.`);
 
-  return {
+  const returningData = {
     status: true,
     login,
     password,
@@ -151,5 +216,9 @@ export default async function loginToNetcity(login: string, password: string): P
     logoutAndCloseBrowser,
     at,
     skipSecurityCheck,
-  };
+  } as LoginToNetcity;
+
+  console.log('RETURNING DATA', returningData);
+
+  return returningData;
 }
