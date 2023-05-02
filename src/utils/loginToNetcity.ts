@@ -52,18 +52,23 @@ export default async function loginToNetcity(login: string, password: string): P
   };
 
   const skipSecurityCheck = async () => {
-    await page.evaluate(() => {
-      try {
-        // @ts-ignore
-        doContinue();
-      } catch (error) {
-        console.log('Не удалось пропустить предупреждение о безопасности, либо его нет.');
-      }
-    });
+    try {
+      await page.evaluate(() => {
+        try {
+          // @ts-ignore
+          doContinue();
+        } catch (error) {
+          console.log('Не удалось пропустить предупреждение о безопасности, либо его нет.');
+        }
+      });
 
-    await page.waitForNetworkIdle();
+      await page.waitForNetworkIdle();
 
-    return true;
+      return true;
+    } catch (error) {
+      console.log('skipSecurityCheck error', error);
+      return false;
+    }
   };
 
   let at = '';
@@ -75,11 +80,11 @@ export default async function loginToNetcity(login: string, password: string): P
       const headerAt = headers['at'];
 
       if (headerAt && headerAt.length) {
-        console.log('AT HAS CHANGED. PREV:', at, 'NEW:', headerAt);
+        console.log('GOT AN AT HEADER. PREV:', at, 'NEW:', headerAt);
         at = headerAt;
       }
     } catch (error) {
-      console.log('get header at error', error);
+      console.log('get AT header error', error);
     }
   });
 
@@ -142,12 +147,6 @@ export default async function loginToNetcity(login: string, password: string): P
         skipSecurityCheck,
       };
     }
-
-    await page.waitForNetworkIdle({
-      idleTime: 5000,
-    });
-
-    await skipSecurityCheck();
   } catch (error) {
     console.log(`Не удалось войти в Сетевой Город через профиль ${login}. Ошибка:`, error);
 
@@ -165,25 +164,44 @@ export default async function loginToNetcity(login: string, password: string): P
     };
   }
 
-  console.log('Waiting for AT Token', login);
+  const waitForAtToken = async (isSecondTime = false) => {
+    await page.waitForNetworkIdle({
+      idleTime: 5000,
+    });
 
-  let isWaitingTimeoutPassed = false;
-  const waitingForATTokenTimeout = setTimeout(() => {
-    console.log('AT Token timeout passed', login);
-    isWaitingTimeoutPassed = true;
-  }, 30000);
+    await skipSecurityCheck();
+    if (isSecondTime) {
+      await waitMs(2000, 4000);
+      await skipSecurityCheck();
+      await waitMs(1000, 3000);
+      await skipSecurityCheck();
 
-  await new Promise<void>((resolve) => {
-    const checkForTimeoutEnd = setInterval(() => {
-      if (at.length > 0 || isWaitingTimeoutPassed) {
-        resolve();
-        clearInterval(checkForTimeoutEnd);
-      }
-    }, 1000);
-  });
+      // чтоб наверняка
+    }
 
-  console.log('cleared AT Token timeout', login);
-  clearInterval(waitingForATTokenTimeout);
+    console.log('Waiting for AT Token', login);
+
+    let isWaitingTimeoutPassed = false;
+    const waitingForATTokenTimeout = setTimeout(() => {
+      console.log('AT Token timeout passed', login);
+      isWaitingTimeoutPassed = true;
+    }, 15000);
+
+    await new Promise<void>((resolve) => {
+      const checkForTimeoutEnd = setInterval(() => {
+        if (at.length > 0 || isWaitingTimeoutPassed) {
+          resolve();
+          clearInterval(checkForTimeoutEnd);
+        }
+      }, 1000);
+    });
+
+    console.log('cleared AT Token timeout', login);
+    clearInterval(waitingForATTokenTimeout);
+  };
+
+  await waitForAtToken();
+  !at.length ? await waitForAtToken() : null;
 
   if (!at.length) {
     console.log('UNABLE TO GET AT TOKEN', login);
