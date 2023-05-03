@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import puppeteer, { HTTPRequest } from 'puppeteer';
 
 import { LoginToNetcity } from '../types/Utils/LoginToNetcity';
 import waitMs from './waitMs';
@@ -11,9 +11,6 @@ export default async function loginToNetcity(login: string, password: string): P
   });
 
   console.log('Браузер открыт.');
-
-  // const testPage = await browser.newPage();
-  // testPage.setContent(login);
 
   const page = await browser.newPage();
 
@@ -31,6 +28,36 @@ export default async function loginToNetcity(login: string, password: string): P
   });
 
   const client = await page.target().createCDPSession();
+
+  await page.setRequestInterception(true);
+
+  let at = '';
+
+  const onRequestFunction = (req: HTTPRequest) => {
+    try {
+      // * Optimization - Skip unnecessary data
+      if (req.resourceType() === 'image') {
+        req.respond({ status: 200, body: 'aborted' });
+        return;
+      } else {
+        req.continue();
+      }
+
+      const headers = req.headers();
+
+      const headerAt = headers['at'];
+
+      if (headerAt && headerAt.length) {
+        console.log('GOT AN AT HEADER. PREV:', at, 'NEW:', headerAt);
+        at = headerAt;
+      }
+    } catch (error) {
+      console.log('get AT header error', error);
+    }
+  };
+
+  page.on('request', onRequestFunction);
+  // page.on('console', (message) => console.log(`BROWSER CONSOLE MESSAGE - ${message.type()}: ${message.text()}`, login));
 
   const logoutAndCloseBrowser = async () => {
     try {
@@ -70,23 +97,6 @@ export default async function loginToNetcity(login: string, password: string): P
       return false;
     }
   };
-
-  let at = '';
-
-  page.on('request', (req) => {
-    try {
-      const headers = req.headers();
-
-      const headerAt = headers['at'];
-
-      if (headerAt && headerAt.length) {
-        console.log('GOT AN AT HEADER. PREV:', at, 'NEW:', headerAt);
-        at = headerAt;
-      }
-    } catch (error) {
-      console.log('get AT header error', error);
-    }
-  });
 
   try {
     await page.goto('https://dnevnik.school59-ekb.ru/', {
@@ -237,6 +247,8 @@ export default async function loginToNetcity(login: string, password: string): P
   } as LoginToNetcity;
 
   console.log('RETURNING DATA', returningData);
+
+  // page.off('request', onRequestFunction);
 
   return returningData;
 }

@@ -21,10 +21,19 @@ async function downloadAttachment({ req, res }: MethodInputData) {
     }
 
     const { sessionId, attachmentId, filename, isTest }: {sessionId: number, attachmentId: number, filename: string, isTest: boolean} = req.body;
+
+    if (!filename) {
+      const response: DownloadAttachmentResponse = {
+        status: false,
+        error: 'Имя файла не введено.',
+      };
+      return res.json(response);
+    }
+
     if (!sessionId || (!attachmentId && attachmentId !== 0)) {
       const response: DownloadAttachmentResponse = {
         status: false,
-        error: 'Вы не ввели название файла, либо ID файла или сессии.',
+        error: 'Вы не ввели ID файла или сессии.',
       };
       return res.json(response);
     }
@@ -61,65 +70,70 @@ async function downloadAttachment({ req, res }: MethodInputData) {
     const downloadPath = path.resolve(__dirname, '../../../files/schedule', filename);
     const writer = createWriteStream(downloadPath);
 
-  response.body!.pipe(writer);
+    response.body!.pipe(writer);
 
-  writer.on('error', (error) => {
-    console.log('Ошибка при сохранении файла:', error);
+    writer.on('error', (error) => {
+      console.log('Ошибка при сохранении файла:', error);
 
-    const response: DownloadAttachmentResponse = {
-      status: false,
-      error: error.message,
-      filename,
-    };
-    return res.json(response);
-  });
+      const response: DownloadAttachmentResponse = {
+        status: false,
+        error: error.message,
+        filename,
+      };
+      return res.json(response);
+    });
 
-  writer.on('close', async () => {
-    // ! converting xls to xlsx
-    if (filename.endsWith('.xls')) {
-      const result: Buffer | null = await new Promise((resolve, reject) => {
-        const xlsBuffer = fs.readFileSync(downloadPath);
+    writer.on('close', async () => {
+      // ! converting xls to xlsx
+      if (filename.endsWith('.xls')) {
+        const result: Buffer | null = await new Promise((resolve, reject) => {
+          const xlsBuffer = fs.readFileSync(downloadPath);
 
-        libre.convert(xlsBuffer, '.xlsx', undefined, ((err, data) => {
-          if (err) resolve(null);
-          resolve(data);
-        }));
-      });
+          libre.convert(xlsBuffer, '.xlsx', undefined, ((err, data) => {
+            if (err) resolve(null);
+            resolve(data);
+          }));
+        });
 
-      if (!result) {
+        if (!result) {
+          const response: DownloadAttachmentResponse = {
+            status: false,
+            error: 'Произошла ошибка при конвертировании .xls в .xlsx.',
+            filename,
+          };
+          return res.json(response);
+        }
+
+        const filenameWithoutExtension = filename.replace('.xls', '');
+        const convertedFilename = `${filenameWithoutExtension}.xlsx`;
+
+        const outputPath = path.resolve(__dirname, '../../../files/schedule', convertedFilename);
+
+        fs.writeFileSync(outputPath, result);
+
+        console.log(`Формат файла ${filename} конвертирован в .xlsx.`);
+
+        console.log('SCHEDULE DEBUGGING SERVER-SIDE. END. SUCCESS CONVERT', filename);
+
         const response: DownloadAttachmentResponse = {
-          status: false,
-          error: 'Произошла ошибка при конвертировании .xls в .xlsx.',
+          status: true,
+          filename: convertedFilename,
+        };
+        return res.json(response);
+      } else {
+        console.log('SCHEDULE DEBUGGING SERVER-SIDE. END. NO CONVERTING', filename);
+
+        const response: DownloadAttachmentResponse = {
+          status: true,
           filename,
         };
         return res.json(response);
       }
+    });
 
-      const filenameWithoutExtension = filename.replace('.xls', '');
-      const convertedFilename = `${filenameWithoutExtension}.xlsx`;
-
-      const outputPath = path.resolve(__dirname, '../../../files/schedule', convertedFilename);
-
-      fs.writeFileSync(outputPath, result);
-
-      console.log(`Формат файла ${filename} конвертирован в .xlsx.`);
-
-      const response: DownloadAttachmentResponse = {
-        status: true,
-        filename: convertedFilename,
-      };
-      return res.json(response);
-    } else {
-      const response: DownloadAttachmentResponse = {
-        status: true,
-        filename,
-      };
-      return res.json(response);
-    }
-  });
-
-  writer.on('finish', writer.close);
+    writer.on('finish', writer.close);
   } catch (error) {
+    console.log('downloadAttachment error', error);
     const response: DownloadAttachmentResponse = {
       status: false,
       error: 'Произошла ошибка при скачивании файла.',
