@@ -24,7 +24,7 @@ async function getReportScreenshot({ req, res }: MethodInputData) {
       return res.status(400).json(response);
     }
 
-    const reportScreenshotPath = path.resolve(__dirname, '../../../files/totalStudentReports', screenshotName);
+    const reportScreenshotPath = path.resolve(__dirname, '../../../files/studentReports', screenshotName);
 
     const isFileExists = existsSync(reportScreenshotPath);
 
