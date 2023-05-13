@@ -172,7 +172,7 @@ async function getTotalStudentReport({ req, res }: MethodInputData) {
     });
 
     const screenshotName = `TotalStudentReport_${login}_${Date.now()}.png`;
-    const reportScreenshotPath = path.resolve(__dirname, '../../../files/totalStudentReports', screenshotName);
+    const reportScreenshotPath = path.resolve(__dirname, '../../../files/studentReports', screenshotName);
 
     const reportTableElement = await page.$('.table-print');
     if (reportTableElement) {
