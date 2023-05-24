@@ -38,19 +38,19 @@ async function downloadAttachment({ req, res }: MethodInputData) {
       return res.json(response);
     }
 
+    if (isTest) {
+      const response: DownloadAttachmentResponse = {
+        status: true,
+        filename,
+      };
+      return res.json(response);
+    }
+
     const session = netcitySession.getSession(sessionId);
     if (!session) {
       const response: DownloadAttachmentResponse = {
         status: false,
         error: 'Сессия устарела.\n\nПерезайдите в Сетевой Город.',
-      };
-      return res.json(response);
-    }
-
-    if (isTest) {
-      const response: DownloadAttachmentResponse = {
-        status: true,
-        filename,
       };
       return res.json(response);
     }
