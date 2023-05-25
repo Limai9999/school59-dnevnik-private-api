@@ -1,38 +1,47 @@
 import { MethodInputData } from '../../types/Methods/MethodInputData';
 import { Credentials } from '../../types/Netcity/Credentials';
 
-import { GetCookiesResponse } from '../../types/Responses/netCity/GetCookiesResponse';
+import { SimplifiedSession } from '../../types/Responses/netCity/GetCookiesResponse';
 
 import loginToNetcity from '../../utils/loginToNetcity';
 
 async function getCookies({ req, res }: MethodInputData) {
   if (!req.body) {
-    const response: GetCookiesResponse = {
+    const response: SimplifiedSession = {
+      peerId: 0,
       status: false,
       login: '',
       password: '',
-      error: 'login и password не введены.',
+      error: 'peerId и login и password не введены.',
+      session: { id: 0, endTime: 0 },
+      at: '',
+      cookies: [],
     };
     return res.json(response);
   }
 
-  const { login, password }: Credentials = req.body;
-  if (!login || !password) {
-    const response: GetCookiesResponse = {
+  const { peerId, login, password }: Credentials = req.body;
+  if (!login || !password || !peerId) {
+    const response: SimplifiedSession = {
+      peerId: 0,
       status: false,
       login: '',
       password: '',
-      error: 'Логин и пароль не введены.',
+      error: 'Логин или пароль или peerId не введены.',
+      session: { id: 0, endTime: 0 },
+      at: '',
+      cookies: [],
     };
     return res.json(response);
   }
 
   const { netcitySession } = req.app.locals;
 
-  const loginData = await loginToNetcity(login, password);
+  const loginData = await loginToNetcity(login, password, peerId);
 
   if (!loginData.status) {
-    const response: GetCookiesResponse = {
+    const response: SimplifiedSession = {
+      peerId,
       status: false,
       login,
       password,
@@ -48,7 +57,8 @@ async function getCookies({ req, res }: MethodInputData) {
 
   const cookies = await loginData.page.cookies();
 
-  const response: GetCookiesResponse = {
+  const response: SimplifiedSession = {
+    peerId,
     status: true,
     login,
     password,

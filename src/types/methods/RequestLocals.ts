@@ -14,4 +14,4 @@ interface ApplicationLocals extends Application {
 
 export interface RequestLocals extends Request {
   app: ApplicationLocals
-};
+}

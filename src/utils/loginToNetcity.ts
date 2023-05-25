@@ -3,7 +3,7 @@ import puppeteer, { HTTPRequest } from 'puppeteer';
 import { LoginToNetcity } from '../types/Utils/LoginToNetcity';
 import waitMs from './waitMs';
 
-export default async function loginToNetcity(login: string, password: string): Promise<LoginToNetcity> {
+export default async function loginToNetcity(login: string, password: string, peerId: number): Promise<LoginToNetcity> {
   const browser = await puppeteer.launch({
     headless: true,
     defaultViewport: null,
@@ -146,6 +146,7 @@ export default async function loginToNetcity(login: string, password: string): P
 
       return {
         status: false,
+        peerId,
         login,
         password,
         error: `${title} - ${description}`,
@@ -162,6 +163,7 @@ export default async function loginToNetcity(login: string, password: string): P
 
     return {
       status: false,
+      peerId,
       login,
       password,
       error: `${error}`,
@@ -218,6 +220,7 @@ export default async function loginToNetcity(login: string, password: string): P
 
     return {
       status: false,
+      peerId,
       error: 'Не удалось получить AT токен для работы с API Сетевого Города.',
       login,
       password,
@@ -227,7 +230,7 @@ export default async function loginToNetcity(login: string, password: string): P
       logoutAndCloseBrowser,
       at,
       skipSecurityCheck,
-    } as LoginToNetcity;
+    };
   } else {
     console.log('GOT AT TOKEN:', at, login);
   }
@@ -236,6 +239,7 @@ export default async function loginToNetcity(login: string, password: string): P
 
   const returningData = {
     status: true,
+    peerId,
     login,
     password,
     page,
@@ -244,7 +248,7 @@ export default async function loginToNetcity(login: string, password: string): P
     logoutAndCloseBrowser,
     at,
     skipSecurityCheck,
-  } as LoginToNetcity;
+  };
 
   console.log('RETURNING DATA', returningData);
 

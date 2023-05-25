@@ -12,7 +12,7 @@ type SecuritySkipInterval = {
 }
 
 class NetCitySession {
-  sessions: Session[];
+  private sessions: Session[];
 
   securitySkipIntervals: SecuritySkipInterval[];
 
@@ -69,6 +69,10 @@ class NetCitySession {
   getSession(id: number): Session | undefined {
     const session = this.sessions.find((session) => session.id === id);
     return session;
+  }
+
+  getAllSessions(): Session[] {
+    return this.sessions;
   }
 
   async closeSession(id: number): Promise<boolean> {

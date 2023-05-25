@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer';
 
 export type LoginToNetcity = {
   status: boolean
+  peerId: number
   login: string
   password: string
   error?: string

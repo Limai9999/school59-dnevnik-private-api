@@ -1,14 +1,15 @@
 import { Protocol } from 'puppeteer';
 
-export type GetCookiesResponse = {
+export type SimplifiedSession = {
   status: boolean
+  peerId: number
   login: string,
   password: string,
   error?: string
-  session?: {
+  session: {
     id: number
     endTime: number
   }
-  at?: string
-  cookies?: Protocol.Network.Cookie[]
+  at: string
+  cookies: Protocol.Network.Cookie[]
 }
