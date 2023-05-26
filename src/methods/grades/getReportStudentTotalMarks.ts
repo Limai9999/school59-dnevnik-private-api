@@ -24,76 +24,62 @@ async function getReportStudentTotalMarks({ req, res }: MethodInputData) {
     return res.json(response);
   }
 
-  const session = netcitySession.getSession(sessionId);
+  try {
+    const session = netcitySession.getSession(sessionId);
 
-  if (!session) {
-    const response: GetReportStudentTotalMarks = {
-      status: false,
-      error: 'Сессия устарела.\n\nПерезайдите в Сетевой Город.',
-    };
-    return res.json(response);
-  }
+    if (!session) {
+      const response: GetReportStudentTotalMarks = {
+        status: false,
+        error: 'Сессия устарела.\n\nПерезайдите в Сетевой Город.',
+      };
+      return res.json(response);
+    }
 
-  const { session: { page, skipSecurityCheck, login } } = session;
+    const { session: { page, skipSecurityCheck, login } } = session;
 
-  await page.evaluate(() => {
+    await page.evaluate(() => {
     // @ts-ignore
-    SetSelectedTab(24, '/angular/school/reports/');
-  });
+      SetSelectedTab(24, '/angular/school/reports/');
+    });
 
-  await page.waitForNetworkIdle();
+    await page.waitForNetworkIdle();
 
-  await skipSecurityCheck();
+    await skipSecurityCheck();
 
-  await page.waitForSelector('[ng-href="studenttotalmarks"]');
-  await page.waitForNetworkIdle();
-  await page.click('[ng-href="studenttotalmarks"]');
+    await page.waitForSelector('[ng-href="studenttotalmarks"]');
+    await page.waitForNetworkIdle();
+    await page.click('[ng-href="studenttotalmarks"]');
 
-  await page.waitForNetworkIdle();
-  await page.click('[title="Сформировать"]');
+    await page.waitForNetworkIdle();
+    await page.click('[title="Сформировать"]');
 
-  await page.waitForSelector('#report');
-  await page.waitForSelector('.table-print-num');
+    await page.waitForSelector('#report');
+    await page.waitForSelector('.table-print-num');
 
-  // const reportResult = await page.evaluate(() => {
-  //   try {
-  //     const report = document.querySelector('#report');
-  //     if (!report) {
-  //       return {
-  //         status: false,
-  //         error: 'Не удалось сформировать отчёт.',
-  //       };
-  //     }
+    const reportResult: GetReportStudentTotalMarks = {
+      status: true,
+    };
 
-  //     const infoTable = report.children[0].children[0].children[4].children[0].children[0].children[1];
-  //     const infoUnformatted = Array.from(infoTable.children) as HTMLElement[];
-  //     const infoResult = infoUnformatted.filter((info) => info.tagName === 'SPAN').map((info) => info.innerText);
+    const screenshotName = `ReportStudentTotalMarks_${login}_${Date.now()}.png`;
+    const reportScreenshotPath = path.resolve(__dirname, '../../../files/studentReports', screenshotName);
 
-  //     const gradesBody = report.children[0].children[0].children[6];
-  //   } catch (error) {
-  //     return {
-  //       status: false,
-  //       error: `${error}`,
-  //     };
-  //   }
-  // });
+    console.log(reportScreenshotPath);
 
-  const reportResult: GetReportStudentTotalMarks = {
-    status: true,
-  };
+    const reportTableElement = await page.$('.table-print-num');
+    if (reportTableElement) {
+      await reportTableElement.screenshot({ path: reportScreenshotPath });
+      reportResult.screenshot = screenshotName;
+    }
 
-  const screenshotName = `ReportStudentTotalMarks_${login}_${Date.now()}.png`;
-  const reportScreenshotPath = path.resolve(__dirname, '../../../files/studentReports', screenshotName);
+    return res.json(reportResult);
+  } catch (error) {
+    const reportResult: GetReportStudentTotalMarks = {
+      status: false,
+      error: `${error}`,
+    };
 
-  console.log(reportScreenshotPath);
-
-  const reportTableElement = await page.$('.table-print-num');
-  if (reportTableElement) {
-    await reportTableElement.screenshot({ path: reportScreenshotPath });
-    reportResult.screenshot = screenshotName;
+    return res.json(reportResult);
   }
-
-  return res.json(reportResult);
 }
 
 export default getReportStudentTotalMarks;
