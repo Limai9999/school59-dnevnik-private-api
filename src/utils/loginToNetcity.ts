@@ -32,13 +32,20 @@ export default async function loginToNetcity(login: string, password: string, pe
   await page.setRequestInterception(true);
 
   let at = '';
+  let isGettingStyleImportantData = false;
+
+  const setIsGettingStyleSensitiveData = (value: boolean) => {
+    isGettingStyleImportantData = value;
+    return isGettingStyleImportantData;
+  };
 
   const onRequestFunction = (req: HTTPRequest) => {
     try {
       // * Optimization - Skip unnecessary data
       if (req.resourceType() === 'image') {
-        req.respond({ status: 200, body: 'aborted' });
-        return;
+        return req.respond({ status: 200, body: 'aborted' });
+      } else if (!isGettingStyleImportantData && (req.resourceType() === 'stylesheet' || req.resourceType() === 'font')) {
+        return req.respond({ status: 200, body: 'aborted' });
       } else {
         req.continue();
       }
@@ -48,7 +55,7 @@ export default async function loginToNetcity(login: string, password: string, pe
       const headerAt = headers['at'];
 
       if (headerAt && headerAt.length) {
-        console.log('GOT AN AT HEADER. PREV:', at, 'NEW:', headerAt);
+        if (!at.length) console.log('GOT AN AT HEADER: ', headerAt);
         at = headerAt;
       }
     } catch (error) {
@@ -153,8 +160,9 @@ export default async function loginToNetcity(login: string, password: string, pe
         page,
         browser,
         client,
-        logoutAndCloseBrowser,
         at,
+        setIsGettingStyleSensitiveData,
+        logoutAndCloseBrowser,
         skipSecurityCheck,
       };
     }
@@ -170,8 +178,9 @@ export default async function loginToNetcity(login: string, password: string, pe
       page,
       browser,
       client,
-      logoutAndCloseBrowser,
       at,
+      setIsGettingStyleSensitiveData,
+      logoutAndCloseBrowser,
       skipSecurityCheck,
     };
   }
@@ -227,8 +236,9 @@ export default async function loginToNetcity(login: string, password: string, pe
       page,
       browser,
       client,
-      logoutAndCloseBrowser,
       at,
+      setIsGettingStyleSensitiveData,
+      logoutAndCloseBrowser,
       skipSecurityCheck,
     };
   } else {
@@ -245,14 +255,13 @@ export default async function loginToNetcity(login: string, password: string, pe
     page,
     browser,
     client,
-    logoutAndCloseBrowser,
     at,
+    setIsGettingStyleSensitiveData,
+    logoutAndCloseBrowser,
     skipSecurityCheck,
   };
 
   console.log('RETURNING DATA', returningData);
-
-  // page.off('request', onRequestFunction);
 
   return returningData;
 }

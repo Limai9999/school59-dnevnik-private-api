@@ -24,19 +24,21 @@ async function getReportStudentTotalMarks({ req, res }: MethodInputData) {
     return res.json(response);
   }
 
+  const session = netcitySession.getSession(sessionId);
+
+  if (!session) {
+    const response: GetReportStudentTotalMarks = {
+      status: false,
+      error: 'Сессия устарела.\n\nПерезайдите в Сетевой Город.',
+    };
+    return res.json(response);
+  }
+
+  const { session: { page, skipSecurityCheck, login, setIsGettingStyleSensitiveData } } = session;
+
+  setIsGettingStyleSensitiveData(true);
+
   try {
-    const session = netcitySession.getSession(sessionId);
-
-    if (!session) {
-      const response: GetReportStudentTotalMarks = {
-        status: false,
-        error: 'Сессия устарела.\n\nПерезайдите в Сетевой Город.',
-      };
-      return res.json(response);
-    }
-
-    const { session: { page, skipSecurityCheck, login } } = session;
-
     await page.evaluate(() => {
     // @ts-ignore
       SetSelectedTab(24, '/angular/school/reports/');
@@ -71,12 +73,16 @@ async function getReportStudentTotalMarks({ req, res }: MethodInputData) {
       reportResult.screenshot = screenshotName;
     }
 
+    setIsGettingStyleSensitiveData(false);
+
     return res.json(reportResult);
   } catch (error) {
     const reportResult: GetReportStudentTotalMarks = {
       status: false,
       error: `${error}`,
     };
+
+    setIsGettingStyleSensitiveData(false);
 
     return res.json(reportResult);
   }

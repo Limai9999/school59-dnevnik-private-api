@@ -5,52 +5,54 @@ import { MethodInputData } from '../../types/Methods/MethodInputData';
 import { AverageGrade, DayData, ReportResult } from '../../types/Responses/grades/GetTotalStudentReportResponse';
 
 async function getTotalStudentReport({ req, res }: MethodInputData) {
+  const { netcitySession } = req.app.locals;
+
+  if (!req.body) {
+    const response: ReportResult = {
+      status: false,
+      error: 'sessionId не введены.',
+      info: [],
+      result: {
+        averageGrades: [],
+        daysData: [],
+      },
+    };
+    return res.json(response);
+  }
+
+  const { sessionId }: {sessionId: number} = req.body;
+  if (!sessionId) {
+    const response: ReportResult = {
+      status: false,
+      error: 'ID сессии не введён.',
+      info: [],
+      result: {
+        averageGrades: [],
+        daysData: [],
+      },
+    };
+    return res.json(response);
+  }
+
+  const session = netcitySession.getSession(sessionId);
+  if (!session) {
+    const response: ReportResult = {
+      status: false,
+      error: 'Сессия устарела.\n\nПерезайдите в Сетевой Город.',
+      info: [],
+      result: {
+        averageGrades: [],
+        daysData: [],
+      },
+    };
+    return res.json(response);
+  }
+
+  const { session: { page, skipSecurityCheck, login, setIsGettingStyleSensitiveData } } = session;
+
+  setIsGettingStyleSensitiveData(true);
+
   try {
-    const { netcitySession } = req.app.locals;
-
-    if (!req.body) {
-      const response: ReportResult = {
-        status: false,
-        error: 'sessionId не введены.',
-        info: [],
-        result: {
-          averageGrades: [],
-          daysData: [],
-        },
-      };
-      return res.json(response);
-    }
-
-    const { sessionId }: {sessionId: number} = req.body;
-    if (!sessionId) {
-      const response: ReportResult = {
-        status: false,
-        error: 'ID сессии не введён.',
-        info: [],
-        result: {
-          averageGrades: [],
-          daysData: [],
-        },
-      };
-      return res.json(response);
-    }
-
-    const session = netcitySession.getSession(sessionId);
-    if (!session) {
-      const response: ReportResult = {
-        status: false,
-        error: 'Сессия устарела.\n\nПерезайдите в Сетевой Город.',
-        info: [],
-        result: {
-          averageGrades: [],
-          daysData: [],
-        },
-      };
-      return res.json(response);
-    }
-
-    const { session: { page, skipSecurityCheck, login } } = session;
-
     await page.evaluate(() => {
       // @ts-ignore
       SetSelectedTab(24, '/angular/school/reports/');
@@ -180,6 +182,8 @@ async function getTotalStudentReport({ req, res }: MethodInputData) {
       reportResult.screenshot = screenshotName;
     }
 
+    setIsGettingStyleSensitiveData(false);
+
     res.json(reportResult);
   } catch (error) {
     const response: ReportResult = {
@@ -191,6 +195,9 @@ async function getTotalStudentReport({ req, res }: MethodInputData) {
         daysData: [],
       },
     };
+
+    setIsGettingStyleSensitiveData(false);
+
     return res.json(response);
   }
 }

@@ -10,6 +10,7 @@ export type LoginToNetcity = {
   browser: puppeteer.Browser
   client: puppeteer.CDPSession
   at: string
+  setIsGettingStyleSensitiveData: (value: boolean) => boolean
   logoutAndCloseBrowser: () => Promise<boolean>
   skipSecurityCheck: () => Promise<boolean>
 };
