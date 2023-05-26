@@ -39,13 +39,29 @@ async function getCookies({ req, res }: MethodInputData) {
 
   try {
     const addPendingLoginStatus = netcitySession.addPendingLoginPeerId(peerId);
+    const isPeerIdHasSession = netcitySession.isPeerIdHasSession(peerId);
     if (!addPendingLoginStatus) {
+      console.log('wanted to start new login while previous is pending');
       const response: SimplifiedSession = {
         peerId,
         status: false,
         login: '',
         password: '',
         error: 'Нельзя начать новый вход, т.к. предыдущий процесс входа ещё не завершен.',
+        session: { id: 0, endTime: 0 },
+        at: '',
+        cookies: [],
+      };
+      return res.json(response);
+    }
+    if (isPeerIdHasSession) {
+      console.log('wanted to start new login while previous is active');
+      const response: SimplifiedSession = {
+        peerId,
+        status: false,
+        login: '',
+        password: '',
+        error: 'Не удалось выполнить вход, т.к. у вас уже есть активная сессия.\nСначала необходимо закрыть предыдущую сессию.',
         session: { id: 0, endTime: 0 },
         at: '',
         cookies: [],
@@ -72,6 +88,19 @@ async function getCookies({ req, res }: MethodInputData) {
     }
 
     const session = netcitySession.addSession(loginData);
+    if (session.id === 0) {
+      const response: SimplifiedSession = {
+        peerId,
+        status: false,
+        login,
+        password,
+        error: 'При входе и сохранении сессии произошла неизвестная ошибка.',
+        session: { id: 0, endTime: 0 },
+        at: loginData.at,
+        cookies: [],
+      };
+      return res.json(response);
+    }
 
     const cookies = await loginData.page.cookies();
 

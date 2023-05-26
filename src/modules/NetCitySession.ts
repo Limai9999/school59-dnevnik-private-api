@@ -24,6 +24,14 @@ class NetCitySession {
 
   addSession(session: LoginToNetcity): {id: number, endTime: number} {
     try {
+      const isPeerIdHasSession = this.isPeerIdHasSession(session.peerId);
+      if (isPeerIdHasSession) {
+        return {
+          id: 0,
+          endTime: 0,
+        };
+      }
+
       if (!session.status) {
         return {
           id: 0,
@@ -69,6 +77,11 @@ class NetCitySession {
   getSession(id: number): Session | undefined {
     const session = this.sessions.find((session) => session.id === id);
     return session;
+  }
+
+  isPeerIdHasSession(peerId: number): boolean {
+    const hasSession = !!this.sessions.find((session) => session.session.peerId === peerId);
+    return hasSession;
   }
 
   getAllSessions(): Session[] {
