@@ -31,9 +31,12 @@ async function getSessionList({ req, res }: MethodInputData) {
     return data;
   }));
 
+  const pendingLoginPeerIds = netcitySession.getPendingLoginPeerIds();
+
   const response: GetSessionListResponse = {
     status: true,
     sessions: simplifiedSessions,
+    pendingLoginPeerIds,
   };
   return res.json(response);
 }

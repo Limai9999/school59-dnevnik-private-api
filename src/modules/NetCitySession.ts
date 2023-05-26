@@ -13,12 +13,12 @@ type SecuritySkipInterval = {
 
 class NetCitySession {
   private sessions: Session[];
-
-  securitySkipIntervals: SecuritySkipInterval[];
+  private pendingLoginPeerIds: number[];
+  private securitySkipIntervals: SecuritySkipInterval[];
 
   constructor() {
     this.sessions = [];
-
+    this.pendingLoginPeerIds = [];
     this.securitySkipIntervals = [];
   }
 
@@ -96,6 +96,22 @@ class NetCitySession {
       console.log('closeSession error', error);
       return false;
     }
+  }
+
+  getPendingLoginPeerIds(): number[] {
+    return this.pendingLoginPeerIds;
+  }
+
+  addPendingLoginPeerId(peerId: number): boolean {
+    const isAlreadyExists = this.pendingLoginPeerIds.find((pendingLoginPeerId) => pendingLoginPeerId === peerId);
+    if (isAlreadyExists) return false;
+
+    this.pendingLoginPeerIds.push(peerId);
+    return true;
+  }
+
+  removePendingLoginPeerId(peerId: number) {
+    this.pendingLoginPeerIds = this.pendingLoginPeerIds.filter((pendingLoginPeerId) => pendingLoginPeerId !== peerId);
   }
 }
 

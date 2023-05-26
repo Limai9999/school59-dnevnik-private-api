@@ -6,6 +6,8 @@ import { SimplifiedSession } from '../../types/Responses/netCity/GetCookiesRespo
 import loginToNetcity from '../../utils/loginToNetcity';
 
 async function getCookies({ req, res }: MethodInputData) {
+  const { netcitySession } = req.app.locals;
+
   if (!req.body) {
     const response: SimplifiedSession = {
       peerId: 0,
@@ -35,38 +37,69 @@ async function getCookies({ req, res }: MethodInputData) {
     return res.json(response);
   }
 
-  const { netcitySession } = req.app.locals;
+  try {
+    const addPendingLoginStatus = netcitySession.addPendingLoginPeerId(peerId);
+    if (!addPendingLoginStatus) {
+      const response: SimplifiedSession = {
+        peerId,
+        status: false,
+        login: '',
+        password: '',
+        error: 'Нельзя начать новый вход, т.к. предыдущий процесс входа ещё не завершен.',
+        session: { id: 0, endTime: 0 },
+        at: '',
+        cookies: [],
+      };
+      return res.json(response);
+    }
 
-  const loginData = await loginToNetcity(login, password, peerId);
+    const loginData = await loginToNetcity(login, password, peerId);
 
-  if (!loginData.status) {
+    netcitySession.removePendingLoginPeerId(peerId);
+
+    if (!loginData.status) {
+      const response: SimplifiedSession = {
+        peerId,
+        status: false,
+        login,
+        password,
+        error: loginData.error!,
+        session: { id: 0, endTime: 0 },
+        at: loginData.at,
+        cookies: [],
+      };
+      return res.json(response);
+    }
+
+    const session = netcitySession.addSession(loginData);
+
+    const cookies = await loginData.page.cookies();
+
+    const response: SimplifiedSession = {
+      peerId,
+      status: true,
+      login,
+      password,
+      session,
+      at: loginData.at,
+      cookies,
+    };
+    return res.json(response);
+  } catch (error) {
+    netcitySession.removePendingLoginPeerId(peerId);
+
     const response: SimplifiedSession = {
       peerId,
       status: false,
-      login,
-      password,
-      error: loginData.error!,
+      login: '',
+      password: '',
+      error: `${error}`,
       session: { id: 0, endTime: 0 },
-      at: loginData.at,
+      at: '',
       cookies: [],
     };
     return res.json(response);
   }
-
-  const session = netcitySession.addSession(loginData);
-
-  const cookies = await loginData.page.cookies();
-
-  const response: SimplifiedSession = {
-    peerId,
-    status: true,
-    login,
-    password,
-    session,
-    at: loginData.at,
-    cookies,
-  };
-  return res.json(response);
 }
 
 export default getCookies;
