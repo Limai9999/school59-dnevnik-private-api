@@ -18,6 +18,7 @@ export type ReportResult = {
   status: boolean,
   error?: string,
   info: string[],
+  isPreview: boolean,
   result: {
     daysData: DayData[],
     averageGrades: AverageGrade[],

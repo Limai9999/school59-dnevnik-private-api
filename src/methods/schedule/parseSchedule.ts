@@ -10,6 +10,7 @@ import { ParseScheduleResponse } from '../../types/Responses/schedule/ParseSched
 type ScheduleData = {
   filename: string
   className: string
+  isPreview: boolean
 }
 
 async function parseSchedule({ req, res }: MethodInputData) {
@@ -17,15 +18,17 @@ async function parseSchedule({ req, res }: MethodInputData) {
     const response: ParseScheduleResponse = {
       status: false,
       error: 'Не введены filename и className',
+      isPreview: false,
     };
     return res.json(response);
   }
 
-  const { filename, className }: ScheduleData = req.body;
-  if (!filename || !className) {
+  const { filename, className, isPreview }: ScheduleData = req.body;
+  if (!filename || !className || (!isPreview && typeof isPreview !== 'boolean')) {
     const response: ParseScheduleResponse = {
       status: false,
       error: 'Название файла и имя класса не введены.',
+      isPreview,
     };
     return res.json(response);
   }
@@ -51,6 +54,7 @@ async function parseSchedule({ req, res }: MethodInputData) {
         status: false,
         error: `Не удалось найти столбец класса ${className}.\nПри добавлении класса, буква должна быть точно такая же, как и в табличном расписании, т.е. с учётом регистра.\n\nНапример, в расписании указано 9б, значит вы должны указать именно 9б, а не 9Б`,
         filename,
+        isPreview,
       };
       return res.json(response);
     }
@@ -196,6 +200,7 @@ async function parseSchedule({ req, res }: MethodInputData) {
       status: true,
       filename,
       schedule: returning,
+      isPreview,
     };
     return res.json(response);
   } catch (error) {
@@ -205,6 +210,7 @@ async function parseSchedule({ req, res }: MethodInputData) {
       status: false,
       filename,
       error: `${error}`,
+      isPreview,
     };
     return res.json(response);
   }

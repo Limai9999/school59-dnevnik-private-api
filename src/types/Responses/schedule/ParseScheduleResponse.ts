@@ -2,6 +2,7 @@ export type ParseScheduleResponse = {
   status: boolean
   filename?: string
   error?: string
+  isPreview: boolean
   schedule?: {
     distant: boolean
     schedule: string[]

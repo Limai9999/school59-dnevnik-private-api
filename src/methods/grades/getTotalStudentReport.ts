@@ -12,6 +12,7 @@ async function getTotalStudentReport({ req, res }: MethodInputData) {
       status: false,
       error: 'sessionId не введены.',
       info: [],
+      isPreview: false,
       result: {
         averageGrades: [],
         daysData: [],
@@ -26,6 +27,7 @@ async function getTotalStudentReport({ req, res }: MethodInputData) {
       status: false,
       error: 'ID сессии не введён.',
       info: [],
+      isPreview: false,
       result: {
         averageGrades: [],
         daysData: [],
@@ -40,6 +42,7 @@ async function getTotalStudentReport({ req, res }: MethodInputData) {
       status: false,
       error: 'Сессия устарела.\n\nПерезайдите в Сетевой Город.',
       info: [],
+      isPreview: false,
       result: {
         averageGrades: [],
         daysData: [],
@@ -79,6 +82,7 @@ async function getTotalStudentReport({ req, res }: MethodInputData) {
             status: false,
             error: 'Не удалось получить отчёт.',
             info: [],
+            isPreview: false,
             result: {
               daysData: [],
               averageGrades: [],
@@ -155,6 +159,7 @@ async function getTotalStudentReport({ req, res }: MethodInputData) {
         return {
           status: true,
           info: infoResult,
+          isPreview: false,
           result: {
             daysData,
             averageGrades,
@@ -165,6 +170,7 @@ async function getTotalStudentReport({ req, res }: MethodInputData) {
           status: false,
           error: `${error}`,
           info: [],
+          isPreview: false,
           result: {
             daysData: [],
             averageGrades: [],
@@ -190,6 +196,7 @@ async function getTotalStudentReport({ req, res }: MethodInputData) {
       status: false,
       error: `${error}`,
       info: [],
+      isPreview: false,
       result: {
         averageGrades: [],
         daysData: [],
