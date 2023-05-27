@@ -43,7 +43,17 @@ async function parseSchedule({ req, res }: MethodInputData) {
 
     // поиск столбца класса
     workbook.worksheets[0].columns.map((column, index) => {
-      if (column.values!.find((e) => e === className) && !classColumn) return classColumn = index;
+      const columnValues = column.values;
+      if (!columnValues) return;
+
+      const foundClassColumn = columnValues.find((value) => {
+        const stringValue = String(value);
+
+        if (stringValue.toLowerCase() === className.toLowerCase()) return true;
+        return false;
+      });
+
+      if (foundClassColumn && !classColumn) return classColumn = index;
     });
 
     // ошибка если класс не найден
@@ -100,7 +110,7 @@ async function parseSchedule({ req, res }: MethodInputData) {
     for (let i = 0; i < lessonsArr.length; i++) {
       const lesson = lessonsArr[i] as string;
 
-      if (lessonsArr[i] && lesson === className && !startString) {
+      if (lessonsArr[i] && lesson.toLowerCase() === className.toLowerCase() && !startString) {
         startString = i + 2;
       }
     }
