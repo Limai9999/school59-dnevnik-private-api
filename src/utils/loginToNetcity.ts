@@ -5,7 +5,7 @@ import waitMs from './waitMs';
 
 export default async function loginToNetcity(login: string, password: string, peerId: number): Promise<LoginToNetcity> {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     defaultViewport: null,
     args: ['--no-sandbox'],
   });
